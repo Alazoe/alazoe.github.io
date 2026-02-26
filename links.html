@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Andrés Lazo — Médico Veterinario Avícola</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f5f0;
+  --white: #ffffff;
+  --dark: #1a1f16;
+  --green: #2d5a30;
+  --green-mid: #3d7a42;
+  --green-light: #e8f2e8;
+  --gold: #b8860b;
+  --gold-light: #fdf6e3;
+  --orange: #c45a2a;
+  --orange-light: #fdf0ea;
+  --blue: #1e5a7a;
+  --blue-light: #e8f2f8;
+  --text: #2a2f26;
+  --muted: #6b7566;
+  --border: #e0dbd0;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px 72px;
+}
+.container { width: 100%; max-width: 480px; }
+
+/* HEADER */
+.header {
+  background: var(--white);
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  padding: 32px 24px 28px;
+  text-align: center;
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeDown 0.6s ease both;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--green), var(--green-mid), #6aaa6e);
+}
+.avatar {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  border: 3px solid var(--green);
+  margin: 0 auto 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(45,90,48,0.2);
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+.header-name {
+  font-family: 'Fraunces', serif;
+  font-size: 26px; font-weight: 900;
+  letter-spacing: -0.5px; color: var(--dark); margin-bottom: 4px;
+}
+.header-title { font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+.header-tags { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
+.htag {
+  font-size: 11px; padding: 4px 10px; border-radius: 100px;
+  background: var(--green-light); border: 1px solid rgba(45,90,48,0.2);
+  color: var(--green); font-weight: 500;
+}
+
+/* SECTION LABEL */
+.section-label {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+  color: var(--muted); margin: 20px 0 8px 4px;
+  display: flex; align-items: center; gap: 10px;
+  animation: fadeUp 0.5s ease both;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* CARD */
+.card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 16px; padding: 16px 18px; margin-bottom: 8px;
+  display: flex; align-items: flex-start; gap: 14px;
+  text-decoration: none; color: var(--text);
+  transition: all 0.2s ease; cursor: pointer;
+  position: relative; overflow: hidden;
+  animation: fadeUp 0.5s ease both;
+}
+.card:hover { border-color: var(--green); transform: translateY(-2px); box-shadow: 0 6px 24px rgba(45,90,48,0.1); }
+.card.disabled { opacity: 0.5; pointer-events: none; }
+
+.card::before {
+  content: ''; position: absolute;
+  left: 0; top: 0; bottom: 0; width: 3px;
+  border-radius: 16px 0 0 16px;
+}
+.card.c-green::before  { background: var(--green); }
+.card.c-gold::before   { background: var(--gold); }
+.card.c-blue::before   { background: var(--blue); }
+.card.c-orange::before { background: var(--orange); }
+
+.card-icon {
+  width: 44px; height: 44px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0; margin-top: 1px;
+}
+.card-icon.green  { background: var(--green-light); }
+.card-icon.gold   { background: var(--gold-light); }
+.card-icon.blue   { background: var(--blue-light); }
+.card-icon.orange { background: var(--orange-light); }
+
+.card-body { flex: 1; min-width: 0; }
+.card-title { font-size: 14px; font-weight: 500; color: var(--dark); margin-bottom: 4px; line-height: 1.3; }
+.card-desc  { font-size: 12px; color: var(--muted); font-weight: 300; line-height: 1.6; }
+
+.card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; padding-top: 2px; }
+.badge { font-size: 10px; padding: 3px 8px; border-radius: 100px; font-weight: 500; white-space: nowrap; }
+.badge-live   { background: #e8f7ee; color: #2d7a42; border: 1px solid #b8e0c4; }
+.badge-soon   { background: var(--gold-light); color: var(--gold); border: 1px solid #e8d4a0; }
+.badge-client { background: var(--blue-light); color: var(--blue); border: 1px solid #b8d4e8; }
+.badge-new    { background: var(--orange-light); color: var(--orange); border: 1px solid #e8c4a8; }
+.card-arrow { color: var(--muted); font-size: 14px; transition: transform 0.2s, color 0.2s; }
+.card:hover .card-arrow { transform: translateX(3px); color: var(--green); }
+
+/* CONTACT */
+.contact-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 16px; padding: 14px 18px; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 14px;
+  text-decoration: none; color: var(--dark);
+  transition: all 0.2s; font-size: 14px; font-weight: 500;
+  animation: fadeUp 0.5s ease both;
+}
+.contact-card:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,0.08); }
+.contact-card.whatsapp { border-left: 3px solid #25d166; }
+.contact-card.email    { border-left: 3px solid var(--gold); }
+.contact-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.contact-icon.wa   { background: #e8f7ee; }
+.contact-icon.mail { background: var(--gold-light); }
+.contact-label { flex: 1; }
+.contact-sub { font-size: 11px; color: var(--muted); font-weight: 300; }
+
+.footer { text-align: center; margin-top: 32px; font-size: 11px; color: var(--muted); line-height: 1.8; }
+
+@keyframes fadeDown { from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:translateY(0); } }
+@keyframes fadeUp   { from { opacity:0; transform:translateY(12px);  } to { opacity:1; transform:translateY(0); } }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- PERFIL -->
+  <div class="header">
+    <div class="avatar">
+      <img src="data:image/jpeg;base64,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" alt="Andrés Lazo">
+    </div>
+    <div class="header-name">Andrés Lazo</div>
+    <div class="header-title">Médico Veterinario · Especialista Avícola<br>Valdivia, Chile 🇨🇱</div>
+    <div class="header-tags">
+      <span class="htag">🌿 Free range</span>
+      <span class="htag">🥚 Gallinas de postura</span>
+      <span class="htag">🔬 Bioseguridad</span>
+    </div>
+  </div>
+
+  <!-- SERVICIOS VETERINARIOS -->
+  <div class="section-label" style="animation-delay:.05s">Servicios veterinarios</div>
+
+  <div class="card c-green" style="animation-delay:.08s">
+    <div class="card-icon green">🩺</div>
+    <div class="card-body">
+      <div class="card-title">Asesoría Veterinaria — Acompañamiento Mensual</div>
+      <div class="card-desc">Experiencia aplicada para diagnosticar cualquier problema que afecte a tus animales. Trabajamos en colaboración contigo, enfocados siempre en las mejores y más efectivas prácticas de manejo.</div>
+    </div>
+    <div class="card-right"><span class="badge badge-live">● Disponible</span></div>
+  </div>
+
+  <div class="card c-green" style="animation-delay:.10s">
+    <div class="card-icon green">💉</div>
+    <div class="card-body">
+      <div class="card-title">Sanidad Animal</div>
+      <div class="card-desc">Diseño y aplicación de programas de vacunación y control de enfermedades adaptados a tu sistema productivo.</div>
+    </div>
+    <div class="card-right"><span class="badge badge-live">● Disponible</span></div>
+  </div>
+
+  <div class="card c-green" style="animation-delay:.12s">
+    <div class="card-icon green">🐔</div>
+    <div class="card-body">
+      <div class="card-title">Manejo Animal</div>
+      <div class="card-desc">Revisión de procedimientos y corrección de manejos productivos para maximizar la eficiencia de tu plantel.</div>
+    </div>
+    <div class="card-right"><span class="badge badge-live">● Disponible</span></div>
+  </div>
+
+  <div class="card c-green" style="animation-delay:.14s">
+    <div class="card-icon green">🛡️</div>
+    <div class="card-body">
+      <div class="card-title">Gestión Sanitaria</div>
+      <div class="card-desc">Acciones planificadas para prevenir, controlar y erradicar enfermedades. Basada en bioseguridad, vigilancia epidemiológica y bienestar animal — la base de una producción sana y sustentable.</div>
+    </div>
+    <div class="card-right"><span class="badge badge-live">● Disponible</span></div>
+  </div>
+
+  <div class="card c-green" style="animation-delay:.16s">
+    <div class="card-icon green">🔍</div>
+    <div class="card-body">
+      <div class="card-title">Visita Veterinaria — Asesoría Puntual</div>
+      <div class="card-desc">Consulta enfocada principalmente a temas sanitarios. Diagnóstico rápido con recomendaciones concretas.</div>
+    </div>
+    <div class="card-right"><span class="badge badge-live">● Disponible</span></div>
+  </div>
+
+  <div class="card c-green" style="animation-delay:.18s">
+    <div class="card-icon green">🤝</div>
+    <div class="card-body">
+      <div class="card-title">Acompañamiento en Proyectos Avícolas</div>
+      <div class="card-desc">Diseño de instalaciones, conversión a free range, certificaciones HFAC y nuevos emprendimientos avícolas.</div>
+    </div>
+    <div class="card-right"><span class="badge badge-live">● Disponible</span></div>
+  </div>
+
+  <div class="card c-green" style="animation-delay:.20s">
+    <div class="card-icon green">🌾</div>
+    <div class="card-body">
+      <div class="card-title">Asesoría Técnica en Nutrición</div>
+      <div class="card-desc">Desarrollo y optimización de dietas para maximizar rendimiento productivo y retorno económico, considerando tipo de crianza y uso eficiente de materias primas.</div>
+    </div>
+    <div class="card-right"><span class="badge badge-live">● Disponible</span></div>
+  </div>
+
+  <!-- HERRAMIENTAS DIGITALES -->
+  <div class="section-label" style="animation-delay:.22s">Herramientas digitales</div>
+
+  <a href="https://alazoe.github.io/auditoria-gallinero/" target="_blank" class="card c-gold" style="animation-delay:.24s">
+    <div class="card-icon gold">📋</div>
+    <div class="card-body">
+      <div class="card-title">Auditoría Completa de Gallinero</div>
+      <div class="card-desc">Layer Signals Checkbook · 8 secciones · +200 ítems · Registro automático en Google Sheets</div>
+    </div>
+    <div class="card-right">
+      <span class="badge badge-live">● App web</span>
+      <span class="card-arrow">→</span>
+    </div>
+  </a>
+
+  <div class="card c-gold" style="animation-delay:.26s">
+    <div class="card-icon gold">📊</div>
+    <div class="card-body">
+      <div class="card-title">Registro de Datos y Control de Stock</div>
+      <div class="card-desc">Seguimiento de producción, inventario de insumos y control de stock para la producción avícola.</div>
+    </div>
+    <div class="card-right"><span class="badge badge-soon">En desarrollo</span></div>
+  </div>
+
+  <div class="card c-gold disabled" style="animation-delay:.28s">
+    <div class="card-icon gold">🇨🇱</div>
+    <div class="card-body">
+      <div class="card-title">Auditoría Resolución SAG Chile</div>
+      <div class="card-desc">Pauta de cumplimiento normativo basada en resoluciones SAG vigentes para predios avícolas.</div>
+    </div>
+    <div class="card-right"><span class="badge badge-soon">Próximamente</span></div>
+  </div>
+
+  <!-- FORMACIÓN -->
+  <div class="section-label" style="animation-delay:.30s">Formación</div>
+
+  <div class="card c-blue" style="animation-delay:.32s">
+    <div class="card-icon blue">🎓</div>
+    <div class="card-body">
+      <div class="card-title">Clases y Capacitación Avícola</div>
+      <div class="card-desc">Para productores, trabajadores de campo y estudiantes · Presencial o en línea · Temario a medida</div>
+    </div>
+    <div class="card-right"><span class="badge badge-live">● Disponible</span></div>
+  </div>
+
+  <!-- PRODUCTOS -->
+  <div class="section-label" style="animation-delay:.34s">Productos</div>
+
+  <div class="card c-orange" style="animation-delay:.36s">
+    <div class="card-icon orange">🌾</div>
+    <div class="card-body">
+      <div class="card-title">Alimento para Gallinas</div>
+      <div class="card-desc">Incluye acompañamiento veterinario básico · Formulación por fase productiva · Seguimiento del lote</div>
+    </div>
+    <div class="card-right"><span class="badge badge-new">Nuevo</span></div>
+  </div>
+
+  <!-- CONTACTO -->
+  <div class="section-label" style="animation-delay:.38s">Contacto directo</div>
+
+  <a href="https://wa.me/56958956340" target="_blank" class="contact-card whatsapp" style="animation-delay:.40s">
+    <div class="contact-icon wa">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="#25d166"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    </div>
+    <div class="contact-label">
+      <div>WhatsApp</div>
+      <div class="contact-sub">+56 9 5895 6340 · Respuesta directa</div>
+    </div>
+    <span class="card-arrow">→</span>
+  </a>
+
+  <a href="mailto:andreslazomv@outlook.com" class="contact-card email" style="animation-delay:.42s">
+    <div class="contact-icon mail">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b8860b" stroke-width="2">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
+      </svg>
+    </div>
+    <div class="contact-label">
+      <div>Correo electrónico</div>
+      <div class="contact-sub">andreslazomv@outlook.com</div>
+    </div>
+    <span class="card-arrow">→</span>
+  </a>
+
+  <div class="footer">
+    Andrés Lazo · Médico Veterinario Avícola<br>
+    Valdivia, Los Ríos · Chile
+  </div>
+
+</div>
+</body>
+</html>
