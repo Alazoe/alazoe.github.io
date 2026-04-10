@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>AviVet · Honorarios</title>
+<link rel="manifest" href="manifest-honorarios.json">
+<meta name="theme-color" content="#1b4332">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Honorarios">
+<link rel="apple-touch-icon" href="assets/img/Bioseguridad/avivet_verde_invertido.png">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;0,9..144,900;1,9..144,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --verde: #1b4332;
+  --verde-mid: #2d6a4f;
+  --verde-light: #d8f3dc;
+  --oro: #c9a84c;
+  --oro-light: #f7f0dc;
+  --crema: #f8f4ec;
+  --text: #1a2b22;
+  --muted: #5a7566;
+  --border: #ddd6c5;
+  --ok: #2d6a4f;
+  --ok-bg: #d8f3dc;
+  --mid: #b45309;
+  --mid-bg: #fef3c7;
+  --min: #991b1b;
+  --min-bg: #fee2e2;
+  --radius: 14px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { background: var(--crema); }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--crema);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* HEADER */
+header {
+  background: var(--verde);
+  padding: 20px 20px 16px;
+  padding-top: calc(20px + env(safe-area-inset-top));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.header-logo {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.5px;
+}
+.header-logo em { color: var(--oro); font-style: italic; font-weight: 400; }
+.header-sub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+  margin-left: auto;
+  font-weight: 400;
+}
+
+/* LAYOUT */
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 680px) {
+  .container { grid-template-columns: 1fr; }
+}
+
+/* CARDS */
+.card {
+  background: #fff;
+  border-radius: var(--radius);
+  padding: 20px;
+  border: 1px solid var(--border);
+}
+.card-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+/* SLIDERS */
+.field { margin-bottom: 20px; }
+.field:last-child { margin-bottom: 0; }
+.field-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+.field-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+.field-value {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--verde);
+}
+.field-unit {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  margin-left: 3px;
+}
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 5px;
+  border-radius: 4px;
+  background: var(--verde-light);
+  outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--verde);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(27,67,50,0.35);
+}
+
+/* DISTANCE BUTTONS */
+.distance-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.dist-btn {
+  border: 1.5px solid var(--border);
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px 6px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .18s;
+  font-family: 'DM Sans', sans-serif;
+}
+.dist-btn.active {
+  border-color: var(--verde);
+  background: var(--verde-light);
+}
+.dist-btn .dist-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  display: block;
+}
+.dist-btn .dist-km {
+  font-size: 10px;
+  color: var(--muted);
+  display: block;
+  margin: 2px 0;
+}
+.dist-btn .dist-min {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--verde);
+  display: block;
+}
+.dist-btn.active .dist-name,
+.dist-btn.active .dist-min { color: var(--verde); }
+
+/* PRICE PER EGG */
+.precio-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.precio-label { font-size: 13px; font-weight: 500; }
+.precio-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--crema);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  flex: 1;
+}
+.precio-prefix { font-size: 13px; color: var(--muted); }
+input[type=number] {
+  border: none;
+  background: transparent;
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--verde);
+  width: 70px;
+  outline: none;
+  text-align: right;
+}
+.precio-suffix { font-size: 11px; color: var(--muted); }
+
+/* RESULT */
+.result-main {
+  background: var(--verde);
+  border-radius: var(--radius);
+  padding: 24px 20px;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.result-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 6px;
+}
+.result-amount {
+  font-family: 'Fraunces', serif;
+  font-size: 42px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.result-currency {
+  font-size: 20px;
+  color: var(--oro);
+  margin-right: 4px;
+}
+.result-note {
+  font-size: 11px;
+  color: rgba(255,255,255,0.45);
+  margin-top: 6px;
+}
+.result-note.applied {
+  color: var(--oro);
+  font-weight: 600;
+}
+
+/* KPI GRID */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.kpi-card {
+  background: var(--crema);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.kpi-name {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.kpi-val {
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+.kpi-unit {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: 'DM Sans', sans-serif;
+  margin-left: 2px;
+}
+
+/* TABLE */
+.tabla-wrap {
+  grid-column: 1 / -1;
+}
+.tabla-wrap .card-title { margin-bottom: 12px; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+th {
+  text-align: left;
+  padding: 8px 10px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+}
+td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--crema);
+  vertical-align: middle;
+}
+tr:last-child td { border-bottom: none; }
+.badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 600;
+}
+.badge-ok { background: var(--ok-bg); color: var(--ok); }
+.badge-mid { background: var(--mid-bg); color: var(--mid); }
+.badge-min { background: var(--min-bg); color: var(--min); }
+.row-current td { background: var(--verde-light); font-weight: 600; }
+.num { font-family: 'Fraunces', serif; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="header-logo">Avi<em>Vet</em></div>
+  </div>
+  <div class="header-sub">Calculadora de Honorarios</div>
+</header>
+
+<div class="container">
+
+  <!-- INPUTS -->
+  <div class="card">
+    <div class="card-title">Parámetros de la visita</div>
+
+    <div class="field">
+      <div class="field-label">
+        <span class="field-name">Gallinas</span>
+        <span class="field-value" id="val-gallinas">1 000<span class="field-unit">aves</span></span>
+      </div>
+      <input type="range" id="sl-gallinas" min="100" max="25000" step="100" value="1000">
+    </div>
+
+    <div class="field">
+      <div class="field-label">
+        <span class="field-name">Postura</span>
+        <span class="field-value" id="val-postura">85<span class="field-unit">%</span></span>
+      </div>
+      <input type="range" id="sl-postura" min="60" max="98" step="1" value="85">
+    </div>
+
+    <div class="card-title" style="margin-top:20px;">Distancia</div>
+    <div class="distance-group">
+      <div class="dist-btn active" data-min="80000">
+        <span class="dist-name">Cercano</span>
+        <span class="dist-km">≤ 50 km</span>
+        <span class="dist-min">$80.000</span>
+      </div>
+      <div class="dist-btn" data-min="100000">
+        <span class="dist-name">Medio</span>
+        <span class="dist-km">50–100 km</span>
+        <span class="dist-min">$100.000</span>
+      </div>
+      <div class="dist-btn" data-min="120000">
+        <span class="dist-name">Lejano</span>
+        <span class="dist-km">&gt; 100 km</span>
+        <span class="dist-min">$120.000</span>
+      </div>
+    </div>
+
+    <div class="card-title">Precio por huevo</div>
+    <div class="precio-row">
+      <div class="precio-input-wrap">
+        <span class="precio-prefix">$</span>
+        <input type="number" id="precio-huevo" value="1" min="0.1" max="100" step="0.1">
+        <span class="precio-suffix">/ huevo</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div>
+    <div class="result-main">
+      <div class="result-label">Honorario a cobrar</div>
+      <div class="result-amount"><span class="result-currency">$</span><span id="res-cobrado">80.000</span></div>
+      <div class="result-note" id="res-nota">Mínimo garantizado aplicado</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Indicadores</div>
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-name">Huevos / mes</div>
+          <div class="kpi-val"><span id="kpi-huevos">25.500</span></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-name">Costo asesoría</div>
+          <div class="kpi-val">$<span id="kpi-costo-huevo">3,14</span><span class="kpi-unit">/ huevo</span></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-name">Honorario / gallina</div>
+          <div class="kpi-val">$<span id="kpi-por-gallina">80</span></div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-name">Honorario / día</div>
+          <div class="kpi-val">$<span id="kpi-por-dia">2.667</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REFERENCE TABLE -->
+  <div class="card tabla-wrap">
+    <div class="card-title">Tabla de referencia — postura actual</div>
+    <table id="tabla">
+      <thead>
+        <tr>
+          <th>Gallinas</th>
+          <th>Huevos/mes</th>
+          <th>Calculado</th>
+          <th>Cobrado</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+const FILAS = [100,300,500,700,1000,1500,2000,3000,5000,7000,10000,15000,20000,25000];
+let minActual = 80000;
+
+const slGallinas = document.getElementById('sl-gallinas');
+const slPostura  = document.getElementById('sl-postura');
+const valGallinas = document.getElementById('val-gallinas');
+const valPostura  = document.getElementById('val-postura');
+const precioInput = document.getElementById('precio-huevo');
+
+const resCobrado  = document.getElementById('res-cobrado');
+const resNota     = document.getElementById('res-nota');
+const kpiHuevos   = document.getElementById('kpi-huevos');
+const kpiCostoH   = document.getElementById('kpi-costo-huevo');
+const kpiGallina  = document.getElementById('kpi-por-gallina');
+const kpiDia      = document.getElementById('kpi-por-dia');
+const tbody       = document.getElementById('tbody');
+
+function fmt(n, dec=0) {
+  return n.toLocaleString('es-CL', {minimumFractionDigits: dec, maximumFractionDigits: dec});
+}
+
+function calcRow(gallinas, postura, precio) {
+  const huevos    = gallinas * (postura / 100) * 30;
+  const calculado = huevos * precio;
+  const cobrado   = Math.max(calculado, minActual);
+  return { huevos, calculado, cobrado };
+}
+
+function statusBadge(calculado, cobrado) {
+  const ratio = calculado / cobrado;
+  if (ratio >= 0.9)       return '<span class="badge badge-ok">OK</span>';
+  if (ratio >= 0.6)       return '<span class="badge badge-mid">Parcial</span>';
+  return '<span class="badge badge-min">Mínimo</span>';
+}
+
+function update() {
+  const gallinas = parseInt(slGallinas.value);
+  const postura  = parseInt(slPostura.value);
+  const precio   = parseFloat(precioInput.value) || 1;
+
+  valGallinas.innerHTML = fmt(gallinas) + '<span class="field-unit"> aves</span>';
+  valPostura.innerHTML  = postura + '<span class="field-unit">%</span>';
+
+  const { huevos, calculado, cobrado } = calcRow(gallinas, postura, precio);
+  const aplicado = cobrado > calculado;
+
+  resCobrado.textContent = fmt(cobrado);
+  resNota.textContent = aplicado
+    ? 'Mínimo garantizado aplicado'
+    : 'Calculado por producción';
+  resNota.className = 'result-note' + (aplicado ? ' applied' : '');
+
+  kpiHuevos.textContent   = fmt(huevos);
+  kpiCostoH.textContent   = fmt(cobrado / huevos, 2);
+  kpiGallina.textContent  = fmt(cobrado / gallinas);
+  kpiDia.textContent      = fmt(cobrado / 30);
+
+  // table
+  tbody.innerHTML = '';
+  FILAS.forEach(g => {
+    const r = calcRow(g, postura, precio);
+    const isCurrent = (g === gallinas);
+    const tr = document.createElement('tr');
+    if (isCurrent) tr.className = 'row-current';
+    tr.innerHTML = `
+      <td class="num">${fmt(g)}</td>
+      <td class="num">${fmt(Math.round(r.huevos))}</td>
+      <td class="num">$${fmt(Math.round(r.calculado))}</td>
+      <td class="num">$${fmt(r.cobrado)}</td>
+      <td>${statusBadge(r.calculado, r.cobrado)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Distance buttons
+document.querySelectorAll('.dist-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.dist-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    minActual = parseInt(btn.dataset.min);
+    update();
+  });
+});
+
+slGallinas.addEventListener('input', update);
+slPostura.addEventListener('input', update);
+precioInput.addEventListener('input', update);
+
+update();
+
+// PWA service worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw-honorarios.js').catch(() => {});
+}
+</script>
+</body>
+</html>

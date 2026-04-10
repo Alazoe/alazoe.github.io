@@ -1,0 +1,18 @@
+{
+  "name": "AviVet Honorarios",
+  "short_name": "Honorarios",
+  "description": "Calculadora de honorarios veterinarios — AviVet",
+  "start_url": "/honorarios.html",
+  "display": "standalone",
+  "background_color": "#f8f4ec",
+  "theme_color": "#1b4332",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "assets/img/Bioseguridad/avivet_verde_invertido.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
