@@ -181,6 +181,11 @@ body {
 .contact-card.email    { border-left: 3px solid var(--gold); }
 .contact-card.tiktok   { border-left: 3px solid #010101; }
 .contact-card.cal      { border-left: 3px solid #1e5a7a; }
+.horario-box { background: var(--white); border: 1px solid var(--border); border-radius: 14px; padding: 12px 16px; margin-bottom: 8px; display: flex; align-items: flex-start; gap: 10px; }
+.horario-box svg { flex-shrink: 0; margin-top: 2px; }
+.horario-title { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.horario-row { font-size: 11px; color: var(--muted); line-height: 1.7; }
+.horario-fuera { font-size: 10px; color: var(--muted); margin-top: 3px; font-style: italic; }
 .contact-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
 .contact-icon.wa   { background: #e8f7ee; }
 .contact-icon.mail { background: var(--gold-light); }
@@ -337,6 +342,15 @@ body {
 
   <!-- CONTACTO -->
   <div class="section-label" style="animation-delay:.37s">Contacto</div>
+
+  <div class="horario-box" style="animation: fadeUp 0.5s ease both; animation-delay:.36s">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1e5a7a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <div>
+      <div class="horario-title">Horario de atención</div>
+      <div class="horario-row">Lun – Vie · 09:00 – 13:00 · 14:00 – 18:30</div>
+      <div class="horario-fuera">Fuera de horario: respuesta a la brevedad posible</div>
+    </div>
+  </div>
 
   <a href="https://cal.com/andres-lazo-oczzxx/45min" target="_blank" class="contact-card cal" style="animation-delay:.37s">
     <div class="contact-icon cal">
