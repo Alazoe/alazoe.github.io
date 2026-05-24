@@ -629,10 +629,10 @@ const RANGOS = {
 // ─── RENDER ENFERMEDADES ──────────────────────────────────────────────────────
 const grid = document.getElementById("enf-grid");
 ENFERMEDADES.forEach(e => {
-  const card = document.createElement("label");
+  const card = document.createElement("div");
   card.className = "enf-card";
   card.innerHTML = `
-    <input type="checkbox" value="${e.id}">
+    <input type="checkbox" value="${e.id}" style="display:none;">
     <div class="enf-check">✓</div>
     <div class="enf-nombre">${e.nombre}</div>
     <div class="enf-desc">${e.desc}</div>`;
@@ -669,7 +669,15 @@ function actualizarSelectores() {
   ENFERMEDADES.filter(e => sel.has(e.id)).forEach(enf => {
     // Vacunas disponibles para esta enfermedad
     const vacs = CATALOGO.filter(v => v.protege.includes(enf.id));
-    if (!vacs.length) return;
+    if (!vacs.length) {
+      html += `<div class="vac-selector-enf" id="enf-selector-${enf.id}">
+        <div class="vac-enf-title"><span>${enf.nombre}</span></div>
+        <div style="font-size:12px;color:var(--muted);font-style:italic;padding:8px 0 12px;">
+          Sin vacunas con ficha técnica SAG en el catálogo. Se aplica en planta de incubación según programa del proveedor.
+        </div>
+      </div>`;
+      return;
+    }
 
     // Agrupar por laboratorio (primer segmento del proveedor)
     const labs = {};
