@@ -210,6 +210,38 @@ tbody tr:hover td { background: var(--green-light); }
   color: var(--green);
 }
 .postura-box strong { font-weight: 700; }
+
+/* CATÁLOGO */
+.cat-group { margin-bottom: 20px; }
+.cat-group-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--green);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--green-light);
+}
+.cat-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+.cat-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  background: var(--bg);
+  font-size: 12px;
+}
+.cat-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.cat-nombre { font-weight: 700; font-size: 13px; color: var(--dark); }
+.cat-tipo { font-size: 10px; padding: 2px 8px; border-radius: 100px; font-weight: 600; }
+.tipo-viva { background: #e8f5e9; color: #2e7d32; }
+.tipo-inactivada { background: #fff3e0; color: #e65100; }
+.cat-row { display: flex; gap: 6px; margin-bottom: 4px; color: var(--muted); }
+.cat-label { font-weight: 600; color: var(--text); min-width: 80px; flex-shrink: 0; }
+.cat-reg { font-size: 10px; color: var(--muted); margin-top: 6px; }
+.cat-notas { font-size: 11px; color: var(--muted); margin-top: 6px; font-style: italic; border-top: 1px solid var(--border); padding-top: 6px; }
+.postura-ok { color: #2e7d32; font-weight: 600; }
+.postura-no { color: #c62828; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -272,17 +304,45 @@ tbody tr:hover td { background: var(--green-light); }
     <p class="nota-final">* El programa puede variar según zona geográfica, historia sanitaria del plantel y disponibilidad de vacunas.</p>
   </div>
 
+  <!-- CATÁLOGO DE VACUNAS -->
+  <div class="panel" id="catalogo-panel" style="display:none; margin-top:18px;">
+    <div class="panel-title">Vacunas Disponibles — Fichas Técnicas SAG</div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">Vacunas registradas en Chile para las enfermedades seleccionadas, según fichas técnicas oficiales.</p>
+    <div id="catalogo-grid"></div>
+  </div>
+
 </div>
 
 <script>
 // ─── BASE DE DATOS ────────────────────────────────────────────────────────────
 const ENFERMEDADES = [
-  { id: "marek",          nombre: "Enfermedad de Marek",                desc: "Herpesvirus. Tumores, parálisis y muerte. Vacunación en incubación." },
-  { id: "gumboro",        nombre: "Gumboro (Bursitis Infecciosa)",      desc: "Birnavirus. Inmunosupresor. Afecta Bolsa de Fabricio en pollitos." },
-  { id: "salmonella",     nombre: "Salmonella",                         desc: "Salmonella Enteritidis. Zoonosis, relevante para inocuidad alimentaria." },
-  { id: "bronquitis",     nombre: "Bronquitis Infecciosa (BI)",         desc: "Coronavirus aviar. Afecta vías respiratorias y producción. Múltiples cepas." },
-  { id: "newcastle",      nombre: "Enfermedad de Newcastle",            desc: "Paramixovirus. Alta mortalidad. Declaración obligatoria." },
-  { id: "laringotraqueitis", nombre: "Laringotraqueitis Infecciosa",   desc: "Herpesvirus. Alta morbilidad en vías respiratorias superiores." }
+  { id: "marek",             nombre: "Enfermedad de Marek",             desc: "Herpesvirus. Tumores, parálisis y muerte. Vacunación en incubación." },
+  { id: "gumboro",           nombre: "Gumboro (Bursitis Infecciosa)",   desc: "Birnavirus inmunosupresor. Afecta Bolsa de Fabricio en pollitos." },
+  { id: "salmonella",        nombre: "Salmonella",                      desc: "Salmonella Enteritidis / typhimurium. Zoonosis — inocuidad alimentaria." },
+  { id: "bronquitis",        nombre: "Bronquitis Infecciosa (BI)",      desc: "Coronavirus aviar. Afecta vías respiratorias y producción. Múltiples cepas." },
+  { id: "newcastle",         nombre: "Enfermedad de Newcastle",         desc: "Paramixovirus. Alta mortalidad. Declaración obligatoria." },
+  { id: "laringotraqueitis", nombre: "Laringotraqueitis Infecciosa",    desc: "Herpesvirus. Alta morbilidad en vías respiratorias superiores." },
+  { id: "viruela",           nombre: "Viruela / Difteroviruela",        desc: "Poxvirus. Lesiones en piel y mucosas. Vacunación por punción alar." },
+  { id: "encefalomielitis",  nombre: "Encefalomielitis Aviar (AE)",     desc: "Picornavirus. Sistema nervioso en pollitos. Vacunación en reproductoras." }
+];
+
+// Catálogo completo desde fichas técnicas oficiales SAG
+const CATALOGO = [
+  { id:"primun_salmonella_e",  nombre:"Primun Salmonella E",      tipo:"Viva",       protege:["salmonella"],                 cepa:"CAL10 Sm+/RIF+/Ssq-",                       via_label:"Oral",                                  edad_min:"Día 1",         programa:"3-4 dosis. Inmunidad desde 14 días post 1ª dosis.",                          resguardo:"Carne 21 d (1ª-3ª), 14 d (4ª). Huevos: 0 d (4ª dosis)", almacenamiento:"2-8°C. No congelar. Proteger de la luz.", proveedor:"Agrovet / Calier",       reg_sag:"2607-B",  postura:false,  notas:"Para pollas de reemplazo. Reduce colonización órganos internos y excreción de S. Enteritidis." },
+  { id:"nobilis_salenvac_t",   nombre:"Nobilis Salenvac T",       tipo:"Inactivada",  protege:["salmonella"],                 cepa:"S. enteritidis Cepa 109 + S. typhimurium DT104", via_label:"Intramuscular (0.5 mL)",              edad_min:"6 semanas",     programa:"2 dosis: 1ª desde sem 6; 2ª a las 4-16 sem post 1ª.",               resguardo:"Cero días",                               almacenamiento:"2-8°C. No congelar.",                     proveedor:"MSD / Intervet Chile",   reg_sag:"2177-B",  postura:false,  notas:"Cubre SE y S. typhimurium. Inmunidad pasiva en progenie. No usar durante postura." },
+  { id:"cevac_ibd_l",          nombre:"CEVAC IBD L",              tipo:"Viva",       protege:["gumboro"],                    cepa:"Winterfield 2512, G61",                      via_label:"Agua de bebida",                        edad_min:"Día 1",         programa:"Según recomendación veterinaria",                                    resguardo:"Cero días",                               almacenamiento:"2-8°C. Protegido de la luz.",             proveedor:"Ceva / Agrovet",         reg_sag:"376-B",   postura:null,   notas:"Presentación: 20×1.000 y 20×5.000 dosis." },
+  { id:"nobilis_gumboro_d78",  nombre:"Nobilis Gumboro D78",      tipo:"Viva",       protege:["gumboro"],                    cepa:"D78",                                        via_label:"Oral / Spray / Óculo-nasal",            edad_min:"Día 1 (spray) / 7-28 d (oral)", programa:"Día 7-28 oral. Si AM variables: 2 dosis con 1 semana intervalo.",    resguardo:"Cero días",                               almacenamiento:"2-8°C. No congelar. Diluyente: 15-30°C.", proveedor:"MSD / Intervet Chile",   reg_sag:"1124-B",  postura:null,   notas:"Compatible con Nobilis IB Ma5 y ND Clone 30." },
+  { id:"bronipra_1",           nombre:"Bronipra 1",               tipo:"Viva",       protege:["bronquitis"],                 cepa:"H120 (Massachusetts)",                       via_label:"Agua de bebida / Nebulización",         edad_min:"Día 1",         programa:"1 dosis/ave desde el 1er día",                                       resguardo:"Cero días",                               almacenamiento:"2-8°C. No congelar.",                     proveedor:"Veterquímica / HIPRA",   reg_sag:"0003-B",  postura:false,  notas:"No administrar durante postura. No coadministrar con otros productos." },
+  { id:"nobilis_ib_ma5",       nombre:"Nobilis IB Ma5",           tipo:"Viva",       protege:["bronquitis"],                 cepa:"Ma5 Massachusetts",                          via_label:"Spray / Ocular-nasal / Agua",           edad_min:"Día 1",         programa:"Desde día 1. Ponedoras: día 1 + revacunación.",                       resguardo:"Cero días",                               almacenamiento:"2-8°C. No congelar. Diluyente: 15-30°C.", proveedor:"MSD / Intervet Chile",   reg_sag:"1155-B",  postura:true,   notas:"No causa reacciones adversas durante postura. Compatible con Nobilis Gumboro D78 y ND Clone 30." },
+  { id:"nobilis_ma5_clone30",  nombre:"Nobilis Ma5 + Clone 30",   tipo:"Viva",       protege:["bronquitis","newcastle"],      cepa:"BI Ma5 Mass + Newcastle Clone 30",           via_label:"Oral / Spray / Ocular / Nasal",         edad_min:"Día 1",         programa:"Desde el primer día de vida",                                        resguardo:"Cero días",                               almacenamiento:"2-8°C. No congelar. Diluyente: 15-30°C.", proveedor:"MSD / Intervet Chile",   reg_sag:"1158-B",  postura:false,  notas:"Combinada BI + Newcastle en una sola aplicación. No usar durante postura." },
+  { id:"nobilis_ib_nd_eds",    nombre:"Nobilis IB + ND + EDS",    tipo:"Inactivada",  protege:["bronquitis","newcastle"],      cepa:"BI Mass + Newcastle Clone 30 + EDS BC14",    via_label:"IM / SC (0.5 mL)",                      edad_min:"16 semanas",    programa:"1 dosis. 16-20 sem, mínimo 4 sem antes de postura. Requiere primovacunación viva.", resguardo:"Cero días",                               almacenamiento:"2-8°C. No congelar. Usar en 3 h de abierto.",  proveedor:"MSD / Intervet Chile",   reg_sag:"1149-B",  postura:false,  notas:"Triple inactivada. Mejores resultados 6+ semanas después de primovacunación viva." },
+  { id:"cevac_nd_ib_eds_k",    nombre:"Cevac ND IB EDS K",        tipo:"Inactivada",  protege:["bronquitis","newcastle"],      cepa:"Newcastle LaSota + BI Mass BB/78 + EDS 76",  via_label:"Subcutánea (cuello) / IM (pechuga/muslo)", edad_min:"~12 semanas",  programa:"0.5 mL/ave, dosis booster. Para aves previamente inmunizadas.",      resguardo:"Cero días",                               almacenamiento:"2-8°C. No congelar. Atemperar 30-35°C.",  proveedor:"Ceva Salud Animal",      reg_sag:"—",       postura:null,   notas:"Adyuvante oleoso. Inyección accidental en humanos: buscar atención médica inmediata." },
+  { id:"hipraviar_s",          nombre:"Hipraviar S",              tipo:"Viva",       protege:["newcastle"],                  cepa:"La Sota",                                    via_label:"Agua de bebida / Nebulización",         edad_min:"Día 1",         programa:"1 dosis/ave desde el 1er día",                                       resguardo:"Cero días",                               almacenamiento:"2-8°C. No congelar.",                     proveedor:"Veterquímica / HIPRA",   reg_sag:"0018-B",  postura:false,  notas:"No administrar durante postura. Usar mascarilla y lentes al aplicar por spray." },
+  { id:"nobilis_nd_c2",        nombre:"Nobilis ND C2",            tipo:"Viva",       protege:["newcastle"],                  cepa:"C2",                                         via_label:"Óculo-nasal / Spray",                   edad_min:"Día 1",         programa:"Dosis única. Revacunar 2-3 semanas después con vacuna viva lentogénica.", resguardo:"Cero días",                              almacenamiento:"2-8°C. No congelar. Diluyente: 15-30°C.", proveedor:"MSD / Intervet Chile",   reg_sag:"2008-B",  postura:false,  notas:"No vacunar durante postura. Usar mascarilla y lentes protectores." },
+  { id:"nobilis_nd_clone30",   nombre:"Nobilis ND Clone 30",      tipo:"Viva",       protege:["newcastle"],                  cepa:"Clone 30",                                   via_label:"Oral / Ocular / Nasal",                 edad_min:"Día 1",         programa:"Desde el primer día de vida",                                        resguardo:"Cero días",                               almacenamiento:"2-8°C. No congelar. Diluyente: 15-30°C.", proveedor:"MSD / Intervet Chile",   reg_sag:"1119-B",  postura:false,  notas:"No usar durante postura. Compatible con Nobilis Gumboro D78 e IB Ma5." },
+  { id:"newcastle_zoetis",     nombre:"Newcastle B1 LaSota (Zoetis)", tipo:"Viva",   protege:["newcastle"],                  cepa:"B1 Type, LaSota Strain",                     via_label:"Intranasal / Ocular / Agua / Spray",    edad_min:"2 sem (agua) / 4 sem (spray)", programa:"Agua ≥2 sem. Spray revacunación ≥4 sem.",               resguardo:"21 días antes del faenamiento",           almacenamiento:"2-7°C. Protegido de la luz.",             proveedor:"Zoetis",                 reg_sag:"—",       postura:null,   notas:"Puede causar infección ocular leve transitoria en humanos. No permitir contacto con ojos." },
+  { id:"lt_vax",               nombre:"LT-VAX (LT-IVAX)",         tipo:"Viva",       protege:["laringotraqueitis"],           cepa:"LT-IVAX",                                    via_label:"Gota ocular",                           edad_min:"4 semanas",     programa:"Inicial: 4 semanas. Revacunación: ≥10 semanas.",                      resguardo:"Cero días",                               almacenamiento:"2-7°C. No congelar. Diluyente: 15-30°C.", proveedor:"MSD / Intervet Chile",   reg_sag:"1194-B",  postura:null,   notas:"Evitar Newcastle o Bronquitis 3 días antes y después. Solo vía ocular." },
+  { id:"nobilis_ae_pox",       nombre:"Nobilis AE+POX",           tipo:"Viva",       protege:["viruela","encefalomielitis"],  cepa:"AE Calnek 1143 + Viruela Pox Gibbs",         via_label:"Punción alar (0.01 mL)",                edad_min:"8-16 semanas",  programa:"Dosis única. No vacunar 28 días previos al inicio de postura.",       resguardo:"Cero días",                               almacenamiento:"2-8°C. No congelar. Proteger de la luz.", proveedor:"MSD / Intervet Chile",   reg_sag:"1148-B",  postura:false,  notas:"Verificar costra en sitio de inoculación a los 7-10 días." }
 ];
 
 const VACUNAS = {
@@ -391,6 +451,7 @@ function generar() {
   const hayBronquitis = sel.size === 0 || sel.has("bronquitis");
 
   renderTabla(calendarioActual, fechaStr !== "", lote, fechaStr, hayBronquitis);
+  renderCatalogo(sel);
 }
 
 function renderTabla(cal, conFecha, lote, fechaStr, hayBronquitis) {
@@ -499,6 +560,56 @@ function exportarPDF() {
   doc.text("* El programa puede variar según zona geográfica, historia sanitaria del plantel y disponibilidad de vacunas. | avivet.cl", 10, finalY);
 
   doc.save(`calendario_vacunacion_${lote.replace(/\s+/g,"_")}.pdf`);
+}
+
+// ─── CATÁLOGO ─────────────────────────────────────────────────────────────────
+function renderCatalogo(sel) {
+  const panel = document.getElementById("catalogo-panel");
+  const grid = document.getElementById("catalogo-grid");
+
+  const enfsConVacunas = ENFERMEDADES.filter(e => sel.size === 0 || sel.has(e.id));
+  const vacunasMostradas = new Set();
+  let html = "";
+
+  enfsConVacunas.forEach(enf => {
+    const vacs = CATALOGO.filter(v => v.protege.includes(enf.id) && !vacunasMostradas.has(v.id));
+    if (!vacs.length) return;
+    vacs.forEach(v => vacunasMostradas.add(v.id));
+
+    html += `<div class="cat-group">
+      <div class="cat-group-title">${enf.nombre}</div>
+      <div class="cat-cards">`;
+
+    vacs.forEach(v => {
+      const tipoCss = v.tipo === "Viva" ? "tipo-viva" : "tipo-inactivada";
+      const posturaLabel = v.postura === true
+        ? '<span class="postura-ok">✓ Permitida</span>'
+        : v.postura === false
+          ? '<span class="postura-no">✗ No usar</span>'
+          : '<span style="color:var(--muted)">Consultar FT</span>';
+
+      html += `<div class="cat-card">
+        <div class="cat-card-header">
+          <div class="cat-nombre">${v.nombre}</div>
+          <span class="cat-tipo ${tipoCss}">${v.tipo}</span>
+        </div>
+        <div class="cat-row"><span class="cat-label">Cepa:</span> ${v.cepa}</div>
+        <div class="cat-row"><span class="cat-label">Vía:</span> ${v.via_label}</div>
+        <div class="cat-row"><span class="cat-label">Edad mín.:</span> ${v.edad_min}</div>
+        <div class="cat-row"><span class="cat-label">Programa:</span> ${v.programa}</div>
+        <div class="cat-row"><span class="cat-label">Resguardo:</span> ${v.resguardo}</div>
+        <div class="cat-row"><span class="cat-label">Postura:</span> ${posturaLabel}</div>
+        <div class="cat-row"><span class="cat-label">Proveedor:</span> ${v.proveedor}</div>
+        <div class="cat-reg">Reg. SAG: ${v.reg_sag} &nbsp;|&nbsp; ${v.almacenamiento}</div>
+        ${v.notas ? `<div class="cat-notas">${v.notas}</div>` : ""}
+      </div>`;
+    });
+
+    html += `</div></div>`;
+  });
+
+  grid.innerHTML = html || '<p style="color:var(--muted);text-align:center;padding:20px;">No hay vacunas en catálogo para las enfermedades seleccionadas.</p>';
+  panel.style.display = "block";
 }
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
