@@ -211,6 +211,105 @@ tbody tr:hover td { background: var(--green-light); }
 }
 .postura-box strong { font-weight: 700; }
 
+/* TABS */
+.tabs-bar {
+  background: var(--dark);
+  display: flex;
+  gap: 4px;
+  padding: 0 24px;
+  border-top: 1px solid rgba(255,255,255,0.07);
+}
+.tab-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 12px 20px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.18s;
+}
+.tab-btn:hover { color: rgba(255,255,255,0.85); }
+.tab-btn.active { color: var(--green-accent); border-bottom-color: var(--green-accent); font-weight: 600; }
+
+/* TAB CONTENT */
+#tab-calendario { display: block; }
+#tab-estado { display: none; }
+
+/* ESTADO FT */
+.estado-filtros { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; align-items: center; }
+.filtro-btn {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 100px;
+  padding: 6px 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  color: var(--muted);
+}
+.filtro-btn:hover { border-color: var(--green-accent); color: var(--green); }
+.filtro-btn.active { background: var(--green); color: white; border-color: var(--green); }
+.estado-resumen { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.resumen-chip {
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.chip-total { background: #f0f0f0; color: #444; }
+.chip-con { background: #e8f5e9; color: #2e7d32; }
+.chip-sin { background: #fce8e8; color: #c62828; }
+.estado-tabla-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+.estado-tabla { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 700px; }
+.estado-tabla thead th {
+  background: var(--green);
+  color: white;
+  padding: 11px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.estado-tabla tbody td { padding: 10px 14px; border-bottom: 1px solid #f0ede8; vertical-align: middle; }
+.estado-tabla tbody tr:last-child td { border-bottom: none; }
+.estado-tabla tbody tr:nth-child(even) td { background: #fafaf8; }
+.estado-tabla tbody tr:hover td { background: var(--green-light); }
+.ft-si { color: #2e7d32; font-weight: 700; font-size: 15px; }
+.ft-no { color: #c62828; font-weight: 700; font-size: 15px; }
+.enf-tag {
+  display: inline-block;
+  background: #e8f5e9;
+  color: #1b5e20;
+  border-radius: 100px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  margin: 1px 2px 1px 0;
+  white-space: nowrap;
+}
+.enf-tag.tag-salmonella { background: #fff3e0; color: #e65100; }
+.enf-tag.tag-bronquitis { background: #e3f2fd; color: #1565c0; }
+.enf-tag.tag-newcastle { background: #f3e5f5; color: #6a1b9a; }
+.enf-tag.tag-gumboro { background: #e8eaf6; color: #283593; }
+.enf-tag.tag-laringotraqueitis { background: #fce4ec; color: #880e4f; }
+.enf-tag.tag-viruela { background: #efebe9; color: #4e342e; }
+.enf-tag.tag-encefalomielitis { background: #e0f2f1; color: #004d40; }
+.enf-tag.tag-marek { background: #f1f8e9; color: #33691e; }
+.enf-tag.tag-eds { background: #fff8e1; color: #f57f17; }
+.tipo-badge { font-size: 11px; padding: 2px 8px; border-radius: 100px; font-weight: 600; }
+.tipo-viva2 { background: #e8f5e9; color: #2e7d32; }
+.tipo-inact { background: #fff3e0; color: #e65100; }
+.reg-cell { font-family: monospace; font-size: 12px; color: var(--muted); }
+.sin-reg { color: #bbb; font-style: italic; font-size: 11px; }
+
 /* CATÁLOGO */
 .cat-group { margin-bottom: 20px; }
 .cat-group-title {
@@ -251,7 +350,14 @@ tbody tr:hover td { background: var(--green-light); }
   <span class="header-title">Calendario de Vacunación Aviar</span>
 </header>
 
+<div class="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab('calendario')">Generar Calendario</button>
+  <button class="tab-btn" onclick="switchTab('estado')">Estado de Fichas Técnicas</button>
+</div>
+
 <div class="contenedor">
+
+<div id="tab-calendario">
 
   <!-- DATOS DEL LOTE -->
   <div class="panel">
@@ -311,7 +417,46 @@ tbody tr:hover td { background: var(--green-light); }
     <div id="catalogo-grid"></div>
   </div>
 
-</div>
+</div><!-- /tab-calendario -->
+
+<!-- ── TAB ESTADO FT ─────────────────────────────────────────── -->
+<div id="tab-estado">
+  <div class="panel">
+    <div class="panel-title">Estado de Fichas Técnicas</div>
+
+    <div class="estado-resumen" id="resumen-chips"></div>
+
+    <div class="estado-filtros">
+      <span style="font-size:12px;color:var(--muted);font-weight:600;">Filtrar:</span>
+      <button class="filtro-btn active" onclick="filtrarEstado('todas',this)">Todas</button>
+      <button class="filtro-btn" onclick="filtrarEstado('con_ft',this)">Con FT ✓</button>
+      <button class="filtro-btn" onclick="filtrarEstado('sin_ft',this)">Sin FT ✗</button>
+      <button class="filtro-btn" onclick="filtrarEstado('viva',this)">Vivas</button>
+      <button class="filtro-btn" onclick="filtrarEstado('inactivada',this)">Inactivadas</button>
+    </div>
+
+    <div class="estado-tabla-wrap">
+      <table class="estado-tabla" id="estado-tabla">
+        <thead>
+          <tr>
+            <th>Nombre Comercial</th>
+            <th>Tipo</th>
+            <th>Laboratorio / Proveedor</th>
+            <th>Enfermedades</th>
+            <th>Reg. SAG</th>
+            <th style="text-align:center;">FT</th>
+          </tr>
+        </thead>
+        <tbody id="estado-tbody"></tbody>
+      </table>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:12px;font-style:italic;">
+      * Para agregar vacunas sin FT, sube el PDF a la carpeta fichas_tecnicas/ del proyecto.
+    </p>
+  </div>
+</div><!-- /tab-estado -->
+
+</div><!-- /contenedor -->
 
 <script>
 // ─── BASE DE DATOS ────────────────────────────────────────────────────────────
@@ -611,6 +756,100 @@ function renderCatalogo(sel) {
 
   grid.innerHTML = html || '<p style="color:var(--muted);text-align:center;padding:20px;">No hay vacunas en catálogo para las enfermedades seleccionadas.</p>';
   panel.style.display = "block";
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById("tab-calendario").style.display = tab === "calendario" ? "block" : "none";
+  document.getElementById("tab-estado").style.display = tab === "estado" ? "block" : "none";
+  document.querySelectorAll(".tab-btn").forEach((btn, i) => {
+    btn.classList.toggle("active", (tab === "calendario" && i === 0) || (tab === "estado" && i === 1));
+  });
+  if (tab === "estado") renderEstado("todas");
+}
+
+// ─── ESTADO FT ────────────────────────────────────────────────────────────────
+
+// Vacunas conocidas pero SIN FT cargada aún (agregar aquí nuevas vacunas a medida que se identifiquen)
+const SIN_FT = [
+  { nombre: "Vectormune LT",       tipo: "Vectorizada", proveedor: "Nutringen / Ceva",      protege: ["marek","laringotraqueitis"], reg_sag: "" },
+  { nombre: "Vectormune ND",       tipo: "Vectorizada", proveedor: "Nutringen / Ceva",      protege: ["marek","newcastle"],         reg_sag: "" },
+  { nombre: "Novamune",            tipo: "Complejo inmune", proveedor: "Nutringen / Ceva",  protege: ["gumboro"],                   reg_sag: "" },
+  { nombre: "Vectormune FP LT AE", tipo: "Vectorizada", proveedor: "Nutringen / Ceva",      protege: ["viruela","laringotraqueitis","encefalomielitis"], reg_sag: "" },
+  { nombre: "Avipro Salmonella",   tipo: "Viva",        proveedor: "Encipharm",             protege: ["salmonella"],                reg_sag: "" },
+  { nombre: "Corymune 4",          tipo: "Inactivada",  proveedor: "Nutringen / Ceva",      protege: ["salmonella","coriza"],       reg_sag: "" },
+  { nombre: "Corymune 7",          tipo: "Inactivada",  proveedor: "Nutringen / Ceva",      protege: ["salmonella","coriza","newcastle","bronquitis","eds"], reg_sag: "" },
+];
+
+const ENF_NOMBRES = {
+  marek: "Marek", gumboro: "Gumboro", salmonella: "Salmonella",
+  bronquitis: "Bronquitis", newcastle: "Newcastle", laringotraqueitis: "Laringotraqueitis",
+  viruela: "Viruela", encefalomielitis: "Encefalomielitis", eds: "EDS", coriza: "Coriza"
+};
+
+let estadoFiltro = "todas";
+
+function filtrarEstado(filtro, btn) {
+  estadoFiltro = filtro;
+  document.querySelectorAll(".filtro-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderEstado(filtro);
+}
+
+function renderEstado(filtro) {
+  // Construir lista completa: con FT + sin FT
+  const conFT = CATALOGO.map(v => ({ ...v, ft: true }));
+  const sinFT = SIN_FT.map(v => ({ ...v, ft: false, cepa: "", reg_sag: v.reg_sag || "" }));
+  let todas = [...conFT, ...sinFT];
+
+  // Ordenar: primero con FT, luego sin FT, ambos grupos alfabéticos
+  todas.sort((a,b) => {
+    if (a.ft !== b.ft) return a.ft ? -1 : 1;
+    return a.nombre.localeCompare(b.nombre);
+  });
+
+  // Filtrar
+  if (filtro === "con_ft") todas = todas.filter(v => v.ft);
+  if (filtro === "sin_ft") todas = todas.filter(v => !v.ft);
+  if (filtro === "viva") todas = todas.filter(v => v.tipo.toLowerCase().includes("viva") || v.tipo.toLowerCase().includes("vector") || v.tipo.toLowerCase().includes("complejo"));
+  if (filtro === "inactivada") todas = todas.filter(v => v.tipo.toLowerCase().includes("inactiv"));
+
+  // Resumen
+  const total = [...conFT, ...sinFT].length;
+  const totalCon = conFT.length;
+  const totalSin = sinFT.length;
+  document.getElementById("resumen-chips").innerHTML = `
+    <div class="resumen-chip chip-total">📋 Total: ${total}</div>
+    <div class="resumen-chip chip-con">✓ Con FT: ${totalCon}</div>
+    <div class="resumen-chip chip-sin">✗ Sin FT: ${totalSin}</div>
+  `;
+
+  // Tabla
+  const tbody = document.getElementById("estado-tbody");
+  if (!todas.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">Sin resultados</td></tr>`; return; }
+
+  tbody.innerHTML = todas.map(v => {
+    const tipoCss = v.tipo.toLowerCase().includes("inactiv") ? "tipo-inact" : "tipo-viva2";
+    const enfs = (v.protege || []).map(e => {
+      const lbl = ENF_NOMBRES[e] || e;
+      return `<span class="enf-tag tag-${e}">${lbl}</span>`;
+    }).join("");
+    const ftCell = v.ft
+      ? `<span class="ft-si" title="Ficha técnica cargada">✓</span>`
+      : `<span class="ft-no" title="Sin ficha técnica">✗</span>`;
+    const regCell = v.reg_sag && v.reg_sag !== "—"
+      ? `<span class="reg-cell">${v.reg_sag}</span>`
+      : `<span class="sin-reg">Sin registro</span>`;
+
+    return `<tr>
+      <td><strong>${v.nombre}</strong></td>
+      <td><span class="tipo-badge ${tipoCss}">${v.tipo}</span></td>
+      <td style="font-size:12px;">${v.proveedor}</td>
+      <td>${enfs}</td>
+      <td>${regCell}</td>
+      <td style="text-align:center;">${ftCell}</td>
+    </tr>`;
+  }).join("");
 }
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
