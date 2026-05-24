@@ -372,6 +372,26 @@ tbody tr:hover td { background: var(--green-light); }
 .warn-box::before { content:"⚠ "; font-weight:700; }
 .cubre-tambien { font-size:11px; background:#e8f5e9; color:#2e7d32; border-radius:6px; padding:4px 10px; margin-top:6px; display:inline-block; font-weight:600; }
 .enf-cubierta-label { font-size:12px; color:var(--muted); font-style:italic; padding:8px 0; }
+
+/* FT RECOMMENDATION */
+.ft-rec-box { background: #f0f8ff; border: 1px solid #b3d4f5; border-radius: 8px; padding: 10px 14px; margin-top: 10px; }
+.ft-rec-title { font-size: 11px; font-weight: 700; color: #1565c0; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.ft-rec-row { display: flex; gap: 6px; margin-bottom: 4px; font-size:12px; }
+.ft-rec-label { font-weight: 600; color: var(--text); min-width: 110px; flex-shrink: 0; }
+.ft-rec-val { color: var(--muted); }
+
+/* TIPO GROUPS IN SELECTOR */
+.tipo-group { margin-bottom: 14px; }
+.tipo-group-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; padding: 3px 10px; border-radius: 100px; display: inline-block; margin-bottom: 8px; }
+.tg-vectorizada { background: #e8eaf6; color: #283593; }
+.tg-complejo    { background: #f3e5f5; color: #6a1b9a; }
+.tg-viva        { background: #e8f5e9; color: #1b5e20; }
+.tg-inactivada  { background: #fff3e0; color: #e65100; }
+
+/* MOVE DAY BUTTONS IN TABLE */
+.btn-mover { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 2px 7px; font-size: 11px; cursor: pointer; color: var(--muted); transition: all 0.15s; font-family: 'DM Sans', sans-serif; margin: 1px; line-height: 1.4; }
+.btn-mover:hover:not(:disabled) { border-color: var(--green-accent); color: var(--green); background: var(--green-light); }
+.btn-mover:disabled { opacity: 0.3; cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -731,6 +751,13 @@ function seleccionarTodas() {
 }
 
 // ─── PASO 3: Selector de vacunas por enfermedad ───────────────────────────────
+const TIPO_GRUPOS = [
+  { key: "vectorizada", label: "Vectorizadas (planta de incubación)", css: "tg-vectorizada", match: t => t.includes("vector") },
+  { key: "complejo",    label: "Complejos inmunes",                   css: "tg-complejo",    match: t => t.includes("complejo") },
+  { key: "viva",        label: "Vivas",                               css: "tg-viva",        match: t => t.includes("viva") || t.includes("congelada") },
+  { key: "inactivada",  label: "Inactivadas",                         css: "tg-inactivada",  match: t => t.includes("inactiv") }
+];
+
 function actualizarSelectores() {
   const sel = new Set([...document.querySelectorAll(".enf-card.on input")].map(cb => cb.value));
   const panel = document.getElementById("panel-vacunas");
@@ -741,7 +768,6 @@ function actualizarSelectores() {
 
   let html = "";
   ENFERMEDADES.filter(e => sel.has(e.id)).forEach(enf => {
-    // Vacunas disponibles para esta enfermedad
     const vacs = CATALOGO.filter(v => v.protege.includes(enf.id));
     if (!vacs.length) {
       html += `<div class="vac-selector-enf" id="enf-selector-${enf.id}">
@@ -753,14 +779,6 @@ function actualizarSelectores() {
       return;
     }
 
-    // Agrupar por laboratorio (primer segmento del proveedor)
-    const labs = {};
-    vacs.forEach(v => {
-      const lab = v.proveedor.split("/")[0].trim();
-      if (!labs[lab]) labs[lab] = [];
-      labs[lab].push(v);
-    });
-
     html += `<div class="vac-selector-enf" id="enf-selector-${enf.id}">
       <div class="vac-enf-title">
         <span>${enf.nombre}</span>
@@ -768,16 +786,18 @@ function actualizarSelectores() {
       </div>
       <div id="enf-cards-${enf.id}">`;
 
-    Object.entries(labs).forEach(([lab, vacLab]) => {
-      html += `<div class="vac-lab-group">
-        <div class="vac-lab-name">${lab}</div>
+    TIPO_GRUPOS.forEach(grupo => {
+      const vacList = vacs.filter(v => grupo.match(v.tipo.toLowerCase()));
+      if (!vacList.length) return;
+      html += `<div class="tipo-group">
+        <div class="tipo-group-title ${grupo.css}">${grupo.label}</div>
         <div class="vac-radio-cards">`;
-
-      vacLab.forEach(v => {
+      vacList.forEach(v => {
         const combinaLabel = v.protege.length > 1
           ? `<div class="cubre-tambien">También cubre: ${v.protege.filter(p => p !== enf.id).map(p => ENF_NOMBRES[p] || p).join(", ")}</div>`
           : "";
-        html += `<label class="vac-radio-card" id="card-${enf.id}-${v.id}" onclick="selectVacuna('${enf.id}','${v.id}',${JSON.stringify(v.protege)})">
+        // data-protege stored as JSON in single-quoted attribute — safe because protege IDs never contain single quotes
+        html += `<div class="vac-radio-card" id="card-${enf.id}-${v.id}" data-enf="${enf.id}" data-vac="${v.id}" data-protege='${JSON.stringify(v.protege)}'>
           <input type="radio" name="vac-${enf.id}" value="${v.id}">
           <div class="vac-card-info">
             <div class="vac-card-nombre">${v.nombre}</div>
@@ -786,9 +806,8 @@ function actualizarSelectores() {
             ${combinaLabel}
             ${v.postura === false ? '<div style="font-size:10px;color:#c62828;font-weight:700;margin-top:4px;">✗ No usar en postura</div>' : ""}
           </div>
-        </label>`;
+        </div>`;
       });
-
       html += `</div></div>`;
     });
 
@@ -798,6 +817,14 @@ function actualizarSelectores() {
   });
 
   container.innerHTML = html;
+
+  // Event listeners on vaccine cards (avoids JSON double-quote issue in onclick attributes)
+  container.querySelectorAll(".vac-radio-card").forEach(card => {
+    card.addEventListener("click", () => {
+      selectVacuna(card.dataset.enf, card.dataset.vac, JSON.parse(card.dataset.protege));
+    });
+  });
+
   actualizarBotonGenerar();
 }
 
@@ -806,6 +833,17 @@ function selectVacuna(enfId, vacId, todosProtege) {
   document.querySelectorAll(`[id^="card-${enfId}-"]`).forEach(c => c.classList.remove("selected"));
   const card = document.getElementById(`card-${enfId}-${vacId}`);
   if (card) { card.classList.add("selected"); card.querySelector("input").checked = true; }
+
+  // Resetear badges de otras enfermedades que esta vacuna cubre
+  const todasEnfs = new Set(ENFERMEDADES.map(e => e.id));
+  todasEnfs.forEach(enf => {
+    if (enf !== enfId) {
+      const badge = document.getElementById(`cubierta-badge-${enf}`);
+      const cards = document.getElementById(`enf-cards-${enf}`);
+      if (badge) badge.style.display = "none";
+      if (cards) cards.style.display = "";
+    }
+  });
 
   // Cubrir enfermedades adicionales de vacunas combinadas
   const sel = new Set([...document.querySelectorAll(".enf-card.on input")].map(cb => cb.value));
@@ -821,37 +859,55 @@ function selectVacuna(enfId, vacId, todosProtege) {
   // Mostrar sliders de días
   const rangos = RANGOS[vacId];
   if (!rangos) return;
+  const vac = CATALOGO.find(v => v.id === vacId);
   const panel = document.getElementById(`dias-panel-${enfId}`);
   panel.style.display = "block";
 
   let html = `<div class="vac-dias-panel"><div class="vac-dias-title">Días de aplicación</div>`;
   rangos.forEach((r, i) => {
     const inputId = `dia-${enfId}-${vacId}-${i}`;
+    const esFixo = r.min === r.max;
     html += `<div class="dosis-row">
       <label>${r.label}</label>
       <input type="range" min="${r.min}" max="${r.max}" value="${r.default}"
         oninput="syncDia('${inputId}',this.value)"
-        id="range-${inputId}">
+        id="range-${inputId}" ${esFixo ? "disabled" : ""}>
       <input type="number" min="${r.min}" max="${r.max}" value="${r.default}"
         oninput="syncDia('${inputId}',this.value)"
-        id="num-${inputId}">
+        id="num-${inputId}" ${esFixo ? "readonly style='background:#f0f0f0;'" : ""}>
       <span class="dosis-semana" id="sem-${inputId}">Sem. ${Math.ceil(r.default / 7)}</span>
     </div>`;
     if (r.nota) html += `<div class="dosis-nota">${r.nota}</div>`;
   });
 
   // Advertencias específicas
-  if (vacId === "nobilis_ib_nd_eds" || vacId === "cevac_nd_ib_eds_k") {
-    html += `<div class="warn-box">Requiere primovacunación previa con vacunas vivas contra Bronquitis y Newcastle.</div>`;
+  if (vacId === "nobilis_ib_nd_eds" || vacId === "cevac_nd_ib_eds_k" || vacId === "cevac_corymune_7k") {
+    html += `<div class="warn-box">Requiere primovacunación previa con vacunas vivas.</div>`;
   }
   if (vacId === "lt_vax") {
     html += `<div class="warn-box">No aplicar dentro de los 3 días antes o después de vacunas Newcastle o Bronquitis.</div>`;
   }
-  if (vacId === "nobilis_ae_pox") {
+  if (vacId === "nobilis_ae_pox" || vacId === "vectormune_fp_lt_ae") {
     html += `<div class="warn-box">No vacunar en los 28 días previos al inicio de postura.</div>`;
+  }
+  if (vacId === "novamune" || vacId === "nobilis_rismavac" || vacId === "vectormune_hvt_ndv" || vacId === "vectormune_hvt_lt") {
+    html += `<div class="warn-box">Almacenamiento en nitrógeno líquido (-196°C). Preparar según indicaciones del proveedor.</div>`;
   }
 
   html += `</div>`;
+
+  // Recomendación según ficha técnica
+  if (vac) {
+    html += `<div class="ft-rec-box">
+      <div class="ft-rec-title">Recomendación según ficha técnica (Reg. SAG ${vac.reg_sag || "—"})</div>
+      <div class="ft-rec-row"><span class="ft-rec-label">Programa:</span><span class="ft-rec-val">${vac.programa}</span></div>
+      <div class="ft-rec-row"><span class="ft-rec-label">Edad mínima:</span><span class="ft-rec-val">${vac.edad_min}</span></div>
+      <div class="ft-rec-row"><span class="ft-rec-label">Resguardo:</span><span class="ft-rec-val">${vac.resguardo}</span></div>
+      <div class="ft-rec-row"><span class="ft-rec-label">Almacenamiento:</span><span class="ft-rec-val">${vac.almacenamiento}</span></div>
+      ${vac.notas ? `<div class="ft-rec-row"><span class="ft-rec-label">Notas:</span><span class="ft-rec-val" style="font-style:italic;">${vac.notas}</span></div>` : ""}
+    </div>`;
+  }
+
   panel.innerHTML = html;
   actualizarBotonGenerar();
 }
@@ -876,14 +932,20 @@ function actualizarBotonGenerar() {
 
 // ─── GENERAR CALENDARIO ───────────────────────────────────────────────────────
 let calendarioActual = [];
+let calFechaStr = "";
+let calLote = "";
+let calHayBronquitis = false;
+let calNextId = 0;
 
 function generar() {
   const sel = new Set([...document.querySelectorAll(".enf-card.on input")].map(cb => cb.value));
-  const fechaStr = document.getElementById("fecha_inicio").value;
-  const lote = document.getElementById("nombre_lote").value || "Lote";
-  const fechaInicio = fechaStr ? new Date(fechaStr + "T12:00:00") : null;
+  calFechaStr = document.getElementById("fecha_inicio").value;
+  calLote = document.getElementById("nombre_lote").value || "Lote";
+  calHayBronquitis = sel.has("bronquitis");
+  const fechaInicio = calFechaStr ? new Date(calFechaStr + "T12:00:00") : null;
 
   calendarioActual = [];
+  calNextId = 0;
 
   // Recolectar vacunas y días seleccionados por el usuario
   ENFERMEDADES.filter(e => sel.has(e.id)).forEach(enf => {
@@ -895,8 +957,7 @@ function generar() {
     if (!vac || !rangos) return;
 
     // Evitar duplicados (vacuna combinada que ya fue agregada)
-    const yaAgregado = calendarioActual.some(c => c.vacuna_id === vacId);
-    if (yaAgregado) return;
+    if (calendarioActual.some(c => c.vacuna_id === vacId)) return;
 
     rangos.forEach((r, i) => {
       const inputId = `dia-${enf.id}-${vacId}-${i}`;
@@ -910,6 +971,7 @@ function generar() {
         fecha = d.toLocaleDateString("es-CL", { day:"2-digit", month:"2-digit", year:"numeric" });
       }
       calendarioActual.push({
+        id: calNextId++,
         dia, semana, fecha,
         vacuna: vac.nombre,
         vacuna_id: vacId,
@@ -924,7 +986,7 @@ function generar() {
   });
 
   calendarioActual.sort((a, b) => a.dia - b.dia);
-  renderTabla(calendarioActual, !!fechaStr, lote, fechaStr, sel.has("bronquitis"));
+  renderTabla(calendarioActual, !!calFechaStr, calLote, calFechaStr, calHayBronquitis);
   renderCatalogo(sel);
 }
 
@@ -948,6 +1010,7 @@ function renderTabla(cal, conFecha, lote, fechaStr, hayBronquitis) {
   head.innerHTML = `<tr>
     <th>Día</th><th>Sem.</th>${conFecha ? "<th>Fecha</th>" : ""}
     <th>Vacuna</th><th>Dosis</th><th>Protege contra</th><th>Vía / Administración</th><th>Proveedor</th><th>Reg. SAG</th><th>Notas</th>
+    <th style="text-align:center;">Ajustar</th>
   </tr>`;
 
   body.innerHTML = cal.map(r => {
@@ -962,11 +1025,29 @@ function renderTabla(cal, conFecha, lote, fechaStr, hayBronquitis) {
       <td style="font-size:12px;">${r.proveedor}</td>
       <td style="font-family:monospace;font-size:11px;color:var(--muted);">${r.reg_sag || "—"}</td>
       <td style="font-size:11px;color:var(--muted);">${r.notas}</td>
+      <td style="text-align:center;white-space:nowrap;">
+        <button class="btn-mover" onclick="moverDia(${r.id}, -7)" ${r.dia <= 7 ? "disabled" : ""} title="Retroceder 1 semana">−7d</button>
+        <button class="btn-mover" onclick="moverDia(${r.id}, 7)" title="Avanzar 1 semana">+7d</button>
+      </td>
     </tr>`;
   }).join("");
 
   document.getElementById("postura-box").style.display = hayBronquitis ? "block" : "none";
   document.getElementById("resultado").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function moverDia(calId, delta) {
+  const entry = calendarioActual.find(e => e.id === calId);
+  if (!entry) return;
+  entry.dia = Math.max(1, entry.dia + delta);
+  entry.semana = Math.ceil(entry.dia / 7);
+  if (calFechaStr) {
+    const d = new Date(calFechaStr + "T12:00:00");
+    d.setDate(d.getDate() + entry.dia - 1);
+    entry.fecha = d.toLocaleDateString("es-CL", { day:"2-digit", month:"2-digit", year:"numeric" });
+  }
+  calendarioActual.sort((a, b) => a.dia - b.dia);
+  renderTabla(calendarioActual, !!calFechaStr, calLote, calFechaStr, calHayBronquitis);
 }
 
 // ─── EXPORTAR PDF ──────────────────────────────────────────────────────────────
