@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendario de Vacunación — AviVet</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root {
+  --bg: #f7f5f0;
+  --white: #ffffff;
+  --dark: #111510;
+  --green: #2a5430;
+  --green-mid: #3d7a42;
+  --green-light: #e4ede5;
+  --green-accent: #5c9e61;
+  --text: #1c2118;
+  --muted: #6a7565;
+  --border: #ddd8cc;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* HEADER */
+header {
+  background: var(--dark);
+  padding: 20px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.header-logo {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  font-weight: 900;
+  color: #fff;
+  text-decoration: none;
+  letter-spacing: -0.5px;
+}
+.header-logo span { color: var(--green-accent); font-style: italic; }
+.header-title {
+  color: rgba(255,255,255,0.6);
+  font-size: 13px;
+}
+
+/* MAIN */
+.contenedor { max-width: 1050px; margin: 0 auto; padding: 28px 16px 60px; }
+
+.panel {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 24px;
+  margin-bottom: 18px;
+  border: 1px solid var(--border);
+}
+.panel-title {
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--green);
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--green-light);
+}
+
+/* FORM */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media(max-width:600px){ .form-grid { grid-template-columns: 1fr; } }
+.form-group label { display: block; font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.form-group input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--text);
+  transition: border-color 0.2s;
+}
+.form-group input:focus { outline: none; border-color: var(--green-accent); }
+
+/* ENFERMEDADES */
+.enf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+}
+.enf-card {
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.18s;
+  user-select: none;
+  position: relative;
+}
+.enf-card:hover { border-color: var(--green-accent); background: #f4faf4; }
+.enf-card.on { border-color: var(--green); background: var(--green-light); }
+.enf-card input { display: none; }
+.enf-check {
+  position: absolute;
+  top: 10px; right: 12px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  color: transparent;
+  background: white;
+  transition: all 0.18s;
+}
+.enf-card.on .enf-check { background: var(--green); border-color: var(--green); color: white; }
+.enf-nombre { font-size: 13px; font-weight: 600; color: var(--green); padding-right: 28px; line-height: 1.3; }
+.enf-desc { font-size: 11px; color: var(--muted); margin-top: 5px; line-height: 1.4; }
+
+.selec-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.selec-row small { font-size: 12px; color: var(--muted); }
+.btn-text { background: none; border: none; color: var(--green); font-size: 12px; cursor: pointer; font-weight: 600; text-decoration: underline; }
+
+/* BOTONES */
+.acciones { display: flex; gap: 12px; margin-top: 4px; flex-wrap: wrap; }
+.btn-primary {
+  background: var(--green);
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 100px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.btn-primary:hover { background: var(--green-mid); transform: translateY(-1px); }
+.btn-pdf {
+  background: white;
+  color: var(--green);
+  border: 2px solid var(--green);
+  padding: 10px 22px;
+  border-radius: 100px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  display: none;
+}
+.btn-pdf:hover { background: var(--green-light); }
+
+/* RESULTADO */
+#resultado { display: none; }
+.result-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid var(--green-light); }
+.result-title { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 700; color: var(--green); }
+.result-meta { font-size: 12px; color: var(--muted); }
+
+/* TABLA */
+.tabla-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 600px; }
+thead th {
+  background: var(--green);
+  color: white;
+  padding: 11px 13px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  white-space: nowrap;
+}
+tbody td { padding: 10px 13px; border-bottom: 1px solid #f0ede8; vertical-align: top; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:nth-child(even) td { background: #fafaf8; }
+tbody tr:hover td { background: var(--green-light); }
+.dia-cell { font-weight: 700; color: var(--green); font-size: 15px; text-align: center; }
+.sem-cell { text-align: center; color: var(--muted); font-size: 12px; }
+.fecha-cell { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.vacuna-cell { font-weight: 600; }
+.prot-cell { font-size: 12px; }
+
+.badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge-sc { background: #e8f4fd; color: #1565c0; }
+.badge-agua { background: #e3f8f0; color: #1b6e45; }
+.badge-spray { background: #fff8e1; color: #8c6400; }
+.badge-im { background: #fce8f3; color: #880e4f; }
+.badge-alar { background: #f3e8ff; color: #5b2d8e; }
+.badge-ocular { background: #e8f5f8; color: #00607a; }
+
+.nota-final { font-size: 11px; color: var(--muted); margin-top: 12px; font-style: italic; }
+
+.empty { text-align: center; color: var(--muted); padding: 40px 20px; font-size: 14px; }
+
+/* POSTURA RECURRENTE */
+.postura-box {
+  background: var(--green-light);
+  border: 1px solid #b7d9ba;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--green);
+}
+.postura-box strong { font-weight: 700; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="https://avivet.cl" class="header-logo">Avi<span>Vet</span></a>
+  <span class="header-title">Calendario de Vacunación Aviar</span>
+</header>
+
+<div class="contenedor">
+
+  <!-- DATOS DEL LOTE -->
+  <div class="panel">
+    <div class="panel-title">Datos del Lote</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Nombre del lote</label>
+        <input type="text" id="nombre_lote" placeholder="Ej: Lote Enero 2026">
+      </div>
+      <div class="form-group">
+        <label>Fecha de ingreso (día 1)</label>
+        <input type="date" id="fecha_inicio">
+      </div>
+    </div>
+  </div>
+
+  <!-- ENFERMEDADES -->
+  <div class="panel">
+    <div class="panel-title">Enfermedades a Cubrir</div>
+    <div class="selec-row">
+      <small>Selecciona las enfermedades que deseas incluir en el programa</small>
+      <button class="btn-text" onclick="seleccionarTodas()">Seleccionar todas</button>
+    </div>
+    <div class="enf-grid" id="enf-grid"></div>
+  </div>
+
+  <!-- ACCIONES -->
+  <div class="acciones">
+    <button class="btn-primary" onclick="generar()">Generar calendario</button>
+    <button class="btn-pdf" id="btn-pdf" onclick="exportarPDF()">⬇ Exportar PDF</button>
+  </div>
+
+  <!-- RESULTADO -->
+  <div class="panel" id="resultado" style="margin-top:18px;">
+    <div class="result-header">
+      <div>
+        <div class="result-title" id="result-title">Programa de Vacunación</div>
+        <div class="result-meta" id="result-meta"></div>
+      </div>
+    </div>
+    <div class="tabla-wrap">
+      <table id="tabla-cal">
+        <thead id="tabla-head"></thead>
+        <tbody id="tabla-body"></tbody>
+      </table>
+    </div>
+    <div class="postura-box" id="postura-box" style="display:none;">
+      <strong>🔁 Durante postura:</strong> Refuerzo de Bronquitis Infecciosa cada 56 días alternando <em>Mass L</em> / <em>Ibrd</em> por vía Spray o Agua de bebida.
+    </div>
+    <p class="nota-final">* El programa puede variar según zona geográfica, historia sanitaria del plantel y disponibilidad de vacunas.</p>
+  </div>
+
+</div>
+
+<script>
+// ─── BASE DE DATOS ────────────────────────────────────────────────────────────
+const ENFERMEDADES = [
+  { id: "marek",          nombre: "Enfermedad de Marek",                desc: "Herpesvirus. Tumores, parálisis y muerte. Vacunación en incubación." },
+  { id: "gumboro",        nombre: "Gumboro (Bursitis Infecciosa)",      desc: "Birnavirus. Inmunosupresor. Afecta Bolsa de Fabricio en pollitos." },
+  { id: "salmonella",     nombre: "Salmonella",                         desc: "Salmonella Enteritidis. Zoonosis, relevante para inocuidad alimentaria." },
+  { id: "bronquitis",     nombre: "Bronquitis Infecciosa (BI)",         desc: "Coronavirus aviar. Afecta vías respiratorias y producción. Múltiples cepas." },
+  { id: "newcastle",      nombre: "Enfermedad de Newcastle",            desc: "Paramixovirus. Alta mortalidad. Declaración obligatoria." },
+  { id: "laringotraqueitis", nombre: "Laringotraqueitis Infecciosa",   desc: "Herpesvirus. Alta morbilidad en vías respiratorias superiores." }
+];
+
+const VACUNAS = {
+  vectormune_lt:      { nombre: "Vectormune LT",      protege: ["marek","laringotraqueitis"], via: "subcutanea",  lugar: "Planta incubación",  proveedor: "Nutringen" },
+  novamune:           { nombre: "Novamune",            protege: ["gumboro"],                  via: "subcutanea",  lugar: "Planta incubación",  proveedor: "Nutringen", notas: "Cepa SYZA 26" },
+  avipro_salmonella:  { nombre: "Avipro Salmonella",  protege: ["salmonella"],               via: "spray",       lugar: "Planta incubación",  proveedor: "Encipharm" },
+  mass_l:             { nombre: "Mass L",              protege: ["bronquitis"],               via: "spray_agua",  lugar: "Incubación o campo", proveedor: "Nutringen", notas: "Cepa Massachusetts" },
+  ibird:              { nombre: "Ibrd",                protege: ["bronquitis"],               via: "spray_agua",  lugar: "Campo",              proveedor: "Nutringen", notas: "Cepa Variante 1/96" },
+  bi_l_49:            { nombre: "Bi L",                protege: ["bronquitis","newcastle"],   via: "spray_agua",  lugar: "Campo",              proveedor: "Nutringen", notas: "Mass + Newcastle B1" },
+  bi_l_77:            { nombre: "Bi L",                protege: ["bronquitis","newcastle"],   via: "spray_agua",  lugar: "Campo",              proveedor: "Nutringen", notas: "Mass + Newcastle B1" },
+  vectormune_fp:      { nombre: "Vectormune FP LT AE",protege: ["laringotraqueitis"],        via: "puncion_alar",lugar: "Campo",              proveedor: "Nutringen", notas: "Difteroviruela + LT + Encefalomielitis" },
+  ibird_98:           { nombre: "Ibrd",                protege: ["bronquitis"],               via: "spray_agua",  lugar: "Campo",              proveedor: "Nutringen", notas: "Cepa Variante 1/96" },
+  corymune_7:         { nombre: "Corymune 7",          protege: ["salmonella","newcastle","bronquitis"], via: "intramuscular", lugar: "Campo", proveedor: "Nutringen", notas: "Pechuga. Salmonella + Coriza + NC + BI + EDS" },
+  avipro_42:          { nombre: "Avipro Salmonella",  protege: ["salmonella"],               via: "agua_bebida", lugar: "Campo",              proveedor: "Encipharm" }
+};
+
+const PROGRAMA = [
+  { dia:1,  sem:1,  id:"vectormune_lt"     },
+  { dia:1,  sem:1,  id:"novamune"          },
+  { dia:1,  sem:1,  id:"avipro_salmonella" },
+  { dia:1,  sem:1,  id:"mass_l"            },
+  { dia:21, sem:3,  id:"ibird"             },
+  { dia:42, sem:6,  id:"avipro_42"         },
+  { dia:49, sem:7,  id:"bi_l_49"           },
+  { dia:70, sem:10, id:"vectormune_fp"     },
+  { dia:77, sem:11, id:"bi_l_77"           },
+  { dia:98, sem:14, id:"ibird_98"          },
+  { dia:105,sem:15, id:"corymune_7"        }
+];
+
+const VIA_LABELS = {
+  subcutanea:   { label: "Subcutánea",    css: "badge-sc"    },
+  spray:        { label: "Spray",         css: "badge-spray" },
+  spray_agua:   { label: "Spray / Agua",  css: "badge-spray" },
+  agua_bebida:  { label: "Agua bebida",   css: "badge-agua"  },
+  intramuscular:{ label: "Intramuscular", css: "badge-im"    },
+  puncion_alar: { label: "Punción alar",  css: "badge-alar"  },
+  ocular:       { label: "Ocular",        css: "badge-ocular"}
+};
+
+// ─── RENDER ENFERMEDADES ──────────────────────────────────────────────────────
+const grid = document.getElementById("enf-grid");
+ENFERMEDADES.forEach(e => {
+  const card = document.createElement("label");
+  card.className = "enf-card";
+  card.innerHTML = `
+    <input type="checkbox" value="${e.id}">
+    <div class="enf-check">✓</div>
+    <div class="enf-nombre">${e.nombre}</div>
+    <div class="enf-desc">${e.desc}</div>`;
+  card.addEventListener("click", () => {
+    const cb = card.querySelector("input");
+    cb.checked = !cb.checked;
+    card.classList.toggle("on", cb.checked);
+  });
+  grid.appendChild(card);
+});
+
+function seleccionarTodas() {
+  const cards = document.querySelectorAll(".enf-card");
+  const todasOn = [...cards].every(c => c.classList.contains("on"));
+  cards.forEach(card => {
+    const cb = card.querySelector("input");
+    cb.checked = !todasOn;
+    card.classList.toggle("on", !todasOn);
+  });
+}
+
+// ─── GENERAR CALENDARIO ───────────────────────────────────────────────────────
+let calendarioActual = [];
+
+function generar() {
+  const sel = new Set([...document.querySelectorAll(".enf-card.on input")].map(cb => cb.value));
+  const fechaStr = document.getElementById("fecha_inicio").value;
+  const lote = document.getElementById("nombre_lote").value || "Lote";
+
+  const fechaInicio = fechaStr ? new Date(fechaStr + "T12:00:00") : null;
+
+  calendarioActual = PROGRAMA
+    .filter(item => {
+      const vac = VACUNAS[item.id];
+      if (sel.size === 0) return true;
+      return vac.protege.some(p => sel.has(p));
+    })
+    .map(item => {
+      const vac = VACUNAS[item.id];
+      let fecha = "";
+      if (fechaInicio) {
+        const d = new Date(fechaInicio);
+        d.setDate(d.getDate() + item.dia - 1);
+        fecha = d.toLocaleDateString("es-CL", { day:"2-digit", month:"2-digit", year:"numeric" });
+      }
+      return {
+        dia: item.dia,
+        semana: item.sem,
+        fecha,
+        vacuna: vac.nombre,
+        protege: vac.protege.map(capitalizar).join(", "),
+        via: item.id === "avipro_42" ? "agua_bebida" : vac.via,
+        lugar: vac.lugar,
+        proveedor: vac.proveedor,
+        notas: vac.notas || ""
+      };
+    });
+
+  const hayBronquitis = sel.size === 0 || sel.has("bronquitis");
+
+  renderTabla(calendarioActual, fechaStr !== "", lote, fechaStr, hayBronquitis);
+}
+
+function renderTabla(cal, conFecha, lote, fechaStr, hayBronquitis) {
+  if (!cal.length) {
+    document.getElementById("resultado").style.display = "none";
+    document.getElementById("btn-pdf").style.display = "none";
+    return;
+  }
+
+  document.getElementById("resultado").style.display = "block";
+  document.getElementById("btn-pdf").style.display = "inline-block";
+  document.getElementById("result-title").textContent = `Programa de Vacunación — ${lote}`;
+  document.getElementById("result-meta").textContent = fechaStr
+    ? `Fecha inicio: ${new Date(fechaStr + "T12:00:00").toLocaleDateString("es-CL", {day:"2-digit",month:"long",year:"numeric"})}`
+    : "Sin fecha definida";
+
+  const head = document.getElementById("tabla-head");
+  const body = document.getElementById("tabla-body");
+
+  head.innerHTML = `<tr>
+    <th>Día</th><th>Sem.</th>${conFecha ? "<th>Fecha</th>" : ""}
+    <th>Vacuna</th><th>Protege contra</th><th>Vía</th><th>Lugar</th><th>Proveedor</th><th>Notas</th>
+  </tr>`;
+
+  body.innerHTML = cal.map(r => {
+    const v = VIA_LABELS[r.via] || { label: r.via, css: "" };
+    return `<tr>
+      <td class="dia-cell">${r.dia}</td>
+      <td class="sem-cell">${r.semana}</td>
+      ${conFecha ? `<td class="fecha-cell">${r.fecha}</td>` : ""}
+      <td class="vacuna-cell">${r.vacuna}</td>
+      <td class="prot-cell">${r.protege}</td>
+      <td><span class="badge ${v.css}">${v.label}</span></td>
+      <td style="font-size:12px;">${r.lugar}</td>
+      <td style="font-size:12px;">${r.proveedor}</td>
+      <td style="font-size:11px;color:var(--muted);">${r.notas}</td>
+    </tr>`;
+  }).join("");
+
+  document.getElementById("postura-box").style.display = hayBronquitis ? "block" : "none";
+
+  document.getElementById("resultado").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+// ─── EXPORTAR PDF ──────────────────────────────────────────────────────────────
+function exportarPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+
+  const lote = document.getElementById("nombre_lote").value || "Lote";
+  const fechaStr = document.getElementById("fecha_inicio").value;
+  const conFecha = !!fechaStr;
+  const hoy = new Date().toLocaleDateString("es-CL", { day:"2-digit", month:"2-digit", year:"numeric" });
+
+  // Encabezado
+  doc.setFillColor(42, 84, 48);
+  doc.rect(0, 0, 297, 22, "F");
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.setTextColor(255, 255, 255);
+  doc.text("CALENDARIO DE VACUNACIÓN AVIAR", 14, 10);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(200, 230, 200);
+  doc.text(`Lote: ${lote}   |   Generado: ${hoy}${conFecha ? "   |   Inicio: " + new Date(fechaStr+"T12:00:00").toLocaleDateString("es-CL") : ""}`, 14, 17);
+
+  // AviVet logo texto
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(11);
+  doc.setTextColor(92, 158, 97);
+  doc.text("AviVet", 260, 10);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(180, 210, 180);
+  doc.text("avivet.cl", 262, 16);
+
+  // Tabla
+  const cols = ["Día", "Sem.", ...(conFecha ? ["Fecha"] : []), "Vacuna", "Protege contra", "Vía", "Lugar", "Proveedor", "Notas"];
+  const rows = calendarioActual.map(r => [
+    r.dia, r.semana,
+    ...(conFecha ? [r.fecha] : []),
+    r.vacuna, r.protege,
+    (VIA_LABELS[r.via] || { label: r.via }).label,
+    r.lugar, r.proveedor, r.notas
+  ]);
+
+  doc.autoTable({
+    head: [cols],
+    body: rows,
+    startY: 26,
+    styles: { fontSize: 8, cellPadding: 3, font: "helvetica" },
+    headStyles: { fillColor: [42, 84, 48], textColor: 255, fontStyle: "bold" },
+    alternateRowStyles: { fillColor: [240, 248, 241] },
+    columnStyles: {
+      0: { halign: "center", fontStyle: "bold", cellWidth: 12 },
+      1: { halign: "center", cellWidth: 12 }
+    },
+    margin: { left: 10, right: 10 }
+  });
+
+  // Nota al pie
+  const finalY = doc.lastAutoTable.finalY + 5;
+  doc.setFontSize(7);
+  doc.setTextColor(150);
+  doc.setFont("helvetica", "italic");
+  doc.text("* El programa puede variar según zona geográfica, historia sanitaria del plantel y disponibilidad de vacunas. | avivet.cl", 10, finalY);
+
+  doc.save(`calendario_vacunacion_${lote.replace(/\s+/g,"_")}.pdf`);
+}
+
+// ─── UTILS ────────────────────────────────────────────────────────────────────
+function capitalizar(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+</script>
+</body>
+</html>
