@@ -388,10 +388,18 @@ tbody tr:hover td { background: var(--green-light); }
 .tg-viva        { background: #e8f5e9; color: #1b5e20; }
 .tg-inactivada  { background: #fff3e0; color: #e65100; }
 
-/* MOVE DAY BUTTONS IN TABLE */
+/* MOVE / DELETE BUTTONS IN TABLE */
 .btn-mover { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 2px 7px; font-size: 11px; cursor: pointer; color: var(--muted); transition: all 0.15s; font-family: 'DM Sans', sans-serif; margin: 1px; line-height: 1.4; }
 .btn-mover:hover:not(:disabled) { border-color: var(--green-accent); color: var(--green); background: var(--green-light); }
 .btn-mover:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-del { border-color: #fca5a5; color: #c62828; }
+.btn-del:hover { background: #fef2f2 !important; border-color: #c62828 !important; color: #c62828 !important; }
+
+/* MULTI-VAC SELECTOR */
+.dias-container { margin-top: 8px; }
+.vac-dias-section { margin-bottom: 10px; }
+.vac-radio-card { cursor: pointer; }
+.vac-radio-card.selected { border-color: var(--green); background: var(--green-light); }
 </style>
 </head>
 <body>
@@ -444,6 +452,7 @@ tbody tr:hover td { background: var(--green-light); }
   <!-- ACCIONES -->
   <div class="acciones">
     <button class="btn-primary" id="btn-generar" onclick="generar()" disabled>Generar calendario</button>
+    <button class="btn-primary" onclick="cargarReferencia()" style="background:var(--green-mid);" title="Carga el programa de referencia AGRICOVIAL para pollas de reemplazo">Programa AGRICOVIAL</button>
     <button class="btn-pdf" id="btn-pdf" onclick="exportarPDF()">⬇ Exportar PDF</button>
   </div>
 
@@ -460,6 +469,14 @@ tbody tr:hover td { background: var(--green-light); }
         <thead id="tabla-head"></thead>
         <tbody id="tabla-body"></tbody>
       </table>
+    </div>
+    <!-- Agregar aplicación manual -->
+    <div id="agregar-row" style="margin-top:16px;padding-top:14px;border-top:2px solid var(--green-light);display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <span style="font-size:12px;font-weight:700;text-transform:uppercase;color:var(--muted);white-space:nowrap;">Agregar:</span>
+      <select id="agregar-vac-id" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--bg);flex:1;min-width:180px;"></select>
+      <input type="text" id="agregar-dosis-label" placeholder="Ej: 2ª dosis" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;width:110px;background:var(--bg);">
+      <input type="number" id="agregar-dia" placeholder="Día" min="1" style="padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;width:74px;background:var(--bg);">
+      <button onclick="agregarFilaManual()" style="background:var(--green);color:white;border:none;padding:8px 16px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">+ Agregar</button>
     </div>
     <div class="postura-box" id="postura-box" style="display:none;">
       <strong>🔁 Durante postura:</strong> Refuerzo de Bronquitis Infecciosa cada 56 días alternando <em>Mass L</em> / <em>Ibrd</em> por vía Spray o Agua de bebida.
@@ -565,7 +582,11 @@ const CATALOGO = [
   { id:"vectormune_fp_lt",     nombre:"Vectormune FP-LT",           tipo:"Vectorizada", protege:["viruela","laringotraqueitis"],  cepa:"Viruela aviar Cepa Cutter recombinante rFP/LT ≥10²·⁷ TCID50", via_label:"Punción alar (0.01 mL)",         edad_min:"4 semanas",     programa:"Dosis única por punción alar.",                                     resguardo:"21 días",                                 almacenamiento:"2-8°C. Usar en 2 h de reconstituido.",    proveedor:"Ceva Salud Animal Chile",  reg_sag:"2727-B",  postura:null,   notas:"Vectorizada Fowlpox-LT. Verificar costra 7-10 días. Aprobado 14-11-2025." },
   { id:"vectormune_fp_lt_ae",  nombre:"Vectormune FP-LT+AE",        tipo:"Vectorizada", protege:["viruela","laringotraqueitis","encefalomielitis"], cepa:"Viruela Cepa Cutter rFP/LT + Encefalomielitis Cepa Calnek", via_label:"Punción alar (0.01 mL)", edad_min:"4 semanas",     programa:"Dosis única. ≥4 sem antes de postura.",                             resguardo:"21 días",                                 almacenamiento:"2-8°C. Usar en 1 h de reconstituido.",    proveedor:"Ceva Salud Animal Chile",  reg_sag:"2733-B",  postura:null,   notas:"Triple: Viruela + Laringotraqueitis + Encefalomielitis. Broilers y pollas reemplazo. Aprobado 18-12-2025." },
   { id:"cevac_bi_l",           nombre:"CEVAC BI L",                 tipo:"Viva",        protege:["bronquitis","newcastle"],       cepa:"BI Cepa Mass B48 + Newcastle Hitchner B1",  via_label:"Ocular / Spray / Agua de bebida",       edad_min:"Día 1",         programa:"Desde el primer día de vida.",                                      resguardo:"Cero días",                               almacenamiento:"2-8°C. Protegido de la luz.",             proveedor:"Ceva Salud Animal Chile",  reg_sag:"0405-B",  postura:null,   notas:"Combinada BI Mass B48 + Newcastle Hitchner B1. Aprobado 29-05-2024." },
-  { id:"univax_bd",            nombre:"Univax BD",                  tipo:"Viva",        protege:["gumboro"],                     cepa:"ST-12 ≥10²·⁵ TCID50",                      via_label:"Agua de bebida / In ovo",               edad_min:"Día 1 / In ovo", programa:"Según recomendación veterinaria.",                                   resguardo:"21 días",                                 almacenamiento:"2-8°C. No congelar.",                     proveedor:"MSD / Intervet Chile",     reg_sag:"664-B",   postura:null,   notas:"Para pollos y huevos embrionados. Resguardo 21 días. Aprobado 09-07-2022." }
+  { id:"univax_bd",            nombre:"Univax BD",                  tipo:"Viva",        protege:["gumboro"],                     cepa:"ST-12 ≥10²·⁵ TCID50",                      via_label:"Agua de bebida / In ovo",               edad_min:"Día 1 / In ovo", programa:"Según recomendación veterinaria.",                                   resguardo:"21 días",                                 almacenamiento:"2-8°C. No congelar.",                     proveedor:"MSD / Intervet Chile",     reg_sag:"664-B",   postura:null,   notas:"Para pollos y huevos embrionados. Resguardo 21 días. Aprobado 09-07-2022." },
+  // ── Nuevas vacunas 2026-05 (segunda carga) ────────────────────────────────────
+  { id:"avipro_salmonella_duo",  nombre:"AviPro Salmonella DUO",      tipo:"Viva",        protege:["salmonella"],                  cepa:"S. Enteritidis Sm24/Rif12/Ssq + S. Typhimurium Nal2/Rif 0/Rit, 1×10⁸–6×10⁸ UFC", via_label:"Oral (agua de bebida)",   edad_min:"Día 1", programa:"3 dosis: día 1, 6-8 sem, 16-18 sem (mín. 3 sem antes postura). Pavos: según programa.", resguardo:"Pollas: 21 días (carne y huevos). Pavos: 70 días post 2ª dosis.", almacenamiento:"2-8°C. No congelar. Proteger de la luz solar directa.", proveedor:"Elanco Chile", reg_sag:"2402-B", postura:false, notas:"Cubre S. Enteritidis + S. Typhimurium (doble protección). Aprobado SAG 09-01-2026." },
+  { id:"avipro_salmonella_vac_e", nombre:"Avipro Salmonella Vac E",   tipo:"Viva",        protege:["salmonella"],                  cepa:"S. enteritidis Sm24/Rif12/Ss, 1×10⁸–6×10⁸ ufc",                    via_label:"Oral (agua de bebida)",   edad_min:"Día 1", programa:"Pollas reemplazo: 3 dosis — día 1, 6-8 sem, 16-18 sem (≥3 sem antes postura). Broiler: dosis única día 1.", resguardo:"21 días", almacenamiento:"2-8°C. No congelar. Proteger de la luz.", proveedor:"Elanco Chile", reg_sag:"—", postura:false, notas:"No vacunar durante postura ni 3 sem previas. Aprobado SAG 24-02-2021." },
+  { id:"innovax_ilt",             nombre:"INNOVAX ILT",                tipo:"Vectorizada", protege:["marek","laringotraqueitis"],   cepa:"HVT recombinante serotipo 3 con 2 genes LT, >2248 UPF",             via_label:"In ovo (0.05 mL) / SC (0.2 mL) día 1", edad_min:"Día 1 / In ovo (18 días embrión)", programa:"Dosis única. In ovo (embrión 18 días, 0.05 mL) o SC día 1 (0.2 mL).", resguardo:"Cero días", almacenamiento:"Nitrógeno líquido (ampollas). Diluyente: temperatura ambiente.", proveedor:"Zoetis Chile", reg_sag:"—", postura:null, notas:"Protección simultánea Marek + Laringotraqueitis. Usar dentro de 2 h de preparado." }
 ];
 
 const VACUNAS = {
@@ -718,6 +739,19 @@ const RANGOS = {
   ],
   univax_bd: [
     { label:"1ª dosis",           min:1,   max:28,  default:14,  nota:"Cepa ST-12. Resguardo 21 días." }
+  ],
+  avipro_salmonella_duo: [
+    { label:"1ª dosis",  min:1,   max:7,   default:1,   nota:"Día 1 de edad. Agua de bebida." },
+    { label:"2ª dosis",  min:42,  max:56,  default:42,  nota:"6-8 semanas de edad." },
+    { label:"3ª dosis",  min:112, max:126, default:112, nota:"16-18 semanas. Mínimo 3 sem antes de postura." }
+  ],
+  avipro_salmonella_vac_e: [
+    { label:"1ª dosis",  min:1,   max:7,   default:1,   nota:"Día 1 de edad." },
+    { label:"2ª dosis",  min:42,  max:56,  default:42,  nota:"6-8 semanas de edad." },
+    { label:"3ª dosis",  min:112, max:126, default:112, nota:"16-18 semanas. Mínimo 3 sem antes de postura." }
+  ],
+  innovax_ilt: [
+    { label:"Dosis única", min:1, max:1, default:1, nota:"In ovo (18 días embrión, 0.05 mL) o SC día 1 (0.2 mL). Almacenamiento en nitrógeno líquido." }
   ]
 };
 
@@ -759,6 +793,42 @@ const TIPO_GRUPOS = [
   { key: "inactivada",  label: "Inactivadas",                         css: "tg-inactivada",  match: t => t.includes("inactiv") }
 ];
 
+function buildEnfSelectorHTML(enf) {
+  const vacs = CATALOGO.filter(v => v.protege.includes(enf.id));
+  if (!vacs.length) {
+    return `<div class="vac-enf-title"><span>${enf.nombre}</span></div>
+      <div style="font-size:12px;color:var(--muted);font-style:italic;padding:8px 0 12px;">
+        Sin vacunas con FT SAG. Se aplica según programa del proveedor.</div>`;
+  }
+  let html = `<div class="vac-enf-title"><span>${enf.nombre}</span>
+    <span style="font-size:11px;color:var(--muted);margin-left:8px;font-weight:400;">— click para agregar (múltiple)</span>
+    </div><div id="enf-cards-${enf.id}">`;
+  TIPO_GRUPOS.forEach(grupo => {
+    const vacList = vacs.filter(v => grupo.match(v.tipo.toLowerCase()));
+    if (!vacList.length) return;
+    html += `<div class="tipo-group">
+      <div class="tipo-group-title ${grupo.css}">${grupo.label}</div>
+      <div class="vac-radio-cards">`;
+    vacList.forEach(v => {
+      const combinaLabel = v.protege.length > 1
+        ? `<div class="cubre-tambien">También cubre: ${v.protege.filter(p => p !== enf.id).map(p => ENF_NOMBRES[p] || p).join(", ")}</div>`
+        : "";
+      html += `<div class="vac-radio-card" id="card-${enf.id}-${v.id}" data-enf="${enf.id}" data-vac="${v.id}">
+        <div class="vac-card-info">
+          <div class="vac-card-nombre">${v.nombre}</div>
+          <div class="vac-card-cepa">${v.cepa || ""}</div>
+          <div class="vac-card-via">${v.via_label}</div>
+          ${combinaLabel}
+          ${v.postura === false ? '<div style="font-size:10px;color:#c62828;font-weight:700;margin-top:4px;">✗ No usar en postura</div>' : ""}
+        </div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  html += `</div><div id="dias-container-${enf.id}" class="dias-container"></div>`;
+  return html;
+}
+
 function actualizarSelectores() {
   const sel = new Set([...document.querySelectorAll(".enf-card.on input")].map(cb => cb.value));
   const panel = document.getElementById("panel-vacunas");
@@ -767,166 +837,110 @@ function actualizarSelectores() {
   if (sel.size === 0) { panel.style.display = "none"; actualizarBotonGenerar(); return; }
   panel.style.display = "block";
 
-  let html = "";
-  ENFERMEDADES.filter(e => sel.has(e.id)).forEach(enf => {
-    const vacs = CATALOGO.filter(v => v.protege.includes(enf.id));
-    if (!vacs.length) {
-      html += `<div class="vac-selector-enf" id="enf-selector-${enf.id}">
-        <div class="vac-enf-title"><span>${enf.nombre}</span></div>
-        <div style="font-size:12px;color:var(--muted);font-style:italic;padding:8px 0 12px;">
-          Sin vacunas con ficha técnica SAG en el catálogo. Se aplica en planta de incubación según programa del proveedor.
-        </div>
-      </div>`;
-      return;
-    }
-
-    html += `<div class="vac-selector-enf" id="enf-selector-${enf.id}">
-      <div class="vac-enf-title">
-        <span>${enf.nombre}</span>
-        <span id="cubierta-badge-${enf.id}" style="display:none;" class="enf-cubierta-label">— cubierta por vacuna combinada</span>
-      </div>
-      <div id="enf-cards-${enf.id}">`;
-
-    TIPO_GRUPOS.forEach(grupo => {
-      const vacList = vacs.filter(v => grupo.match(v.tipo.toLowerCase()));
-      if (!vacList.length) return;
-      html += `<div class="tipo-group">
-        <div class="tipo-group-title ${grupo.css}">${grupo.label}</div>
-        <div class="vac-radio-cards">`;
-      vacList.forEach(v => {
-        const combinaLabel = v.protege.length > 1
-          ? `<div class="cubre-tambien">También cubre: ${v.protege.filter(p => p !== enf.id).map(p => ENF_NOMBRES[p] || p).join(", ")}</div>`
-          : "";
-        // data-protege stored as JSON in single-quoted attribute — safe because protege IDs never contain single quotes
-        html += `<div class="vac-radio-card" id="card-${enf.id}-${v.id}" data-enf="${enf.id}" data-vac="${v.id}" data-protege='${JSON.stringify(v.protege)}'>
-          <input type="radio" name="vac-${enf.id}" value="${v.id}">
-          <div class="vac-card-info">
-            <div class="vac-card-nombre">${v.nombre}</div>
-            <div class="vac-card-cepa">${v.cepa || ""}</div>
-            <div class="vac-card-via">${v.via_label}</div>
-            ${combinaLabel}
-            ${v.postura === false ? '<div style="font-size:10px;color:#c62828;font-weight:700;margin-top:4px;">✗ No usar en postura</div>' : ""}
-          </div>
-        </div>`;
-      });
-      html += `</div></div>`;
-    });
-
-    html += `</div>
-      <div id="dias-panel-${enf.id}" style="display:none;"></div>
-    </div>`;
+  // Quitar secciones de enfermedades deseleccionadas (preserva las seleccionadas)
+  [...container.querySelectorAll(".vac-selector-enf")].forEach(section => {
+    if (!sel.has(section.id.replace("enf-selector-", ""))) section.remove();
   });
 
-  container.innerHTML = html;
-
-  // Event listeners on vaccine cards (avoids JSON double-quote issue in onclick attributes)
-  container.querySelectorAll(".vac-radio-card").forEach(card => {
-    card.addEventListener("click", () => {
-      selectVacuna(card.dataset.enf, card.dataset.vac, JSON.parse(card.dataset.protege));
-    });
+  // Agregar secciones nuevas y reordenar según ENFERMEDADES
+  ENFERMEDADES.filter(e => sel.has(e.id)).forEach((enf, idx) => {
+    let section = document.getElementById(`enf-selector-${enf.id}`);
+    if (!section) {
+      section = document.createElement("div");
+      section.className = "vac-selector-enf";
+      section.id = `enf-selector-${enf.id}`;
+      section.innerHTML = buildEnfSelectorHTML(enf);
+      section.querySelectorAll(".vac-radio-card").forEach(card => {
+        card.addEventListener("click", () => toggleVacuna(card.dataset.enf, card.dataset.vac));
+      });
+    }
+    // Mantener orden correcto (insertBefore reordena sin destruir estado)
+    const sibling = container.children[idx];
+    if (sibling !== section) container.insertBefore(section, sibling || null);
   });
 
   actualizarBotonGenerar();
 }
 
-function selectVacuna(enfId, vacId, todosProtege) {
-  // Marcar card seleccionada
-  document.querySelectorAll(`[id^="card-${enfId}-"]`).forEach(c => c.classList.remove("selected"));
+function toggleVacuna(enfId, vacId) {
   const card = document.getElementById(`card-${enfId}-${vacId}`);
-  if (card) { card.classList.add("selected"); card.querySelector("input").checked = true; }
+  if (!card) return;
+  if (card.classList.contains("selected")) {
+    card.classList.remove("selected");
+    const panel = document.getElementById(`dias-panel-${enfId}-${vacId}`);
+    if (panel) panel.remove();
+  } else {
+    card.classList.add("selected");
+    crearDiasPanel(enfId, vacId);
+  }
+  actualizarBotonGenerar();
+}
 
-  // Resetear badges de otras enfermedades que esta vacuna cubre
-  const todasEnfs = new Set(ENFERMEDADES.map(e => e.id));
-  todasEnfs.forEach(enf => {
-    if (enf !== enfId) {
-      const badge = document.getElementById(`cubierta-badge-${enf}`);
-      const cards = document.getElementById(`enf-cards-${enf}`);
-      if (badge) badge.style.display = "none";
-      if (cards) cards.style.display = "";
-    }
-  });
+const WARNS_VAC = {
+  "nobilis_ib_nd_eds":   "Requiere primovacunación previa con vacunas vivas.",
+  "cevac_nd_ib_eds_k":   "Requiere primovacunación previa con vacunas vivas.",
+  "cevac_corymune_7k":   "Requiere primovacunación previa con vacunas vivas.",
+  "lt_vax":              "No aplicar 3 días antes/después de vacunas Newcastle o Bronquitis.",
+  "nobilis_ae_pox":      "No vacunar 28 días previos al inicio de postura.",
+  "vectormune_fp_lt_ae": "No vacunar 28 días previos al inicio de postura.",
+  "novamune":            "Almacenamiento en nitrógeno líquido (-196°C).",
+  "nobilis_rismavac":    "Almacenamiento en nitrógeno líquido (-196°C).",
+  "vectormune_hvt_ndv":  "Almacenamiento en nitrógeno líquido (-196°C).",
+  "vectormune_hvt_lt":   "Almacenamiento en nitrógeno líquido (-196°C).",
+  "innovax_ilt":         "Almacenamiento en nitrógeno líquido (-196°C)."
+};
 
-  // Cubrir enfermedades adicionales de vacunas combinadas
-  const sel = new Set([...document.querySelectorAll(".enf-card.on input")].map(cb => cb.value));
-  todosProtege.forEach(enf => {
-    if (enf !== enfId && sel.has(enf)) {
-      const badge = document.getElementById(`cubierta-badge-${enf}`);
-      const cards = document.getElementById(`enf-cards-${enf}`);
-      if (badge) badge.style.display = "inline";
-      if (cards) cards.style.display = "none";
-    }
-  });
-
-  // Mostrar sliders de días
+function crearDiasPanel(enfId, vacId) {
   const rangos = RANGOS[vacId];
-  if (!rangos) return;
   const vac = CATALOGO.find(v => v.id === vacId);
-  const panel = document.getElementById(`dias-panel-${enfId}`);
-  panel.style.display = "block";
+  if (!rangos || !vac) return;
+  const container = document.getElementById(`dias-container-${enfId}`);
+  if (!container) return;
 
-  let html = `<div class="vac-dias-panel"><div class="vac-dias-title">Días de aplicación</div>`;
+  const section = document.createElement("div");
+  section.id = `dias-panel-${enfId}-${vacId}`;
+  section.className = "vac-dias-section";
+
+  let html = `<div class="vac-dias-panel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div class="vac-dias-title">${vac.nombre}</div>
+      <button class="btn-text" onclick="toggleVacuna('${enfId}','${vacId}')" style="color:#c62828;">✕ quitar</button>
+    </div>`;
+
   rangos.forEach((r, i) => {
     const inputId = `dia-${enfId}-${vacId}-${i}`;
     const esFixo = r.min === r.max;
     html += `<div class="dosis-row">
       <label>${r.label}</label>
-      <input type="range" min="${r.min}" max="${r.max}" value="${r.default}"
-        oninput="syncDia('${inputId}',this.value)"
-        id="range-${inputId}" ${esFixo ? "disabled" : ""}>
-      <input type="number" min="${r.min}" max="${r.max}" value="${r.default}"
-        oninput="syncDia('${inputId}',this.value)"
-        id="num-${inputId}" ${esFixo ? "readonly style='background:#f0f0f0;'" : ""}>
+      <input type="number" value="${r.default}" min="1" id="num-${inputId}"
+        oninput="actualizarSemana('${inputId}',this.value)"
+        style="width:70px;padding:4px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;font-weight:700;text-align:center;${esFixo ? "background:#f0f0f0;" : ""}"
+        ${esFixo ? "readonly" : ""}>
       <span class="dosis-semana" id="sem-${inputId}">Sem. ${Math.ceil(r.default / 7)}</span>
     </div>`;
     if (r.nota) html += `<div class="dosis-nota">${r.nota}</div>`;
   });
 
-  // Advertencias específicas
-  if (vacId === "nobilis_ib_nd_eds" || vacId === "cevac_nd_ib_eds_k" || vacId === "cevac_corymune_7k") {
-    html += `<div class="warn-box">Requiere primovacunación previa con vacunas vivas.</div>`;
-  }
-  if (vacId === "lt_vax") {
-    html += `<div class="warn-box">No aplicar dentro de los 3 días antes o después de vacunas Newcastle o Bronquitis.</div>`;
-  }
-  if (vacId === "nobilis_ae_pox" || vacId === "vectormune_fp_lt_ae") {
-    html += `<div class="warn-box">No vacunar en los 28 días previos al inicio de postura.</div>`;
-  }
-  if (vacId === "novamune" || vacId === "nobilis_rismavac" || vacId === "vectormune_hvt_ndv" || vacId === "vectormune_hvt_lt") {
-    html += `<div class="warn-box">Almacenamiento en nitrógeno líquido (-196°C). Preparar según indicaciones del proveedor.</div>`;
-  }
+  if (WARNS_VAC[vacId]) html += `<div class="warn-box">${WARNS_VAC[vacId]}</div>`;
 
-  html += `</div>`;
+  html += `<div class="ft-rec-box">
+    <div class="ft-rec-title">Ficha técnica · Reg. SAG ${vac.reg_sag || "—"}</div>
+    <div class="ft-rec-row"><span class="ft-rec-label">Programa:</span><span class="ft-rec-val">${vac.programa}</span></div>
+    <div class="ft-rec-row"><span class="ft-rec-label">Resguardo:</span><span class="ft-rec-val">${vac.resguardo}</span></div>
+    <div class="ft-rec-row"><span class="ft-rec-label">Almacenamiento:</span><span class="ft-rec-val">${vac.almacenamiento}</span></div>
+  </div></div>`;
 
-  // Recomendación según ficha técnica
-  if (vac) {
-    html += `<div class="ft-rec-box">
-      <div class="ft-rec-title">Recomendación según ficha técnica (Reg. SAG ${vac.reg_sag || "—"})</div>
-      <div class="ft-rec-row"><span class="ft-rec-label">Programa:</span><span class="ft-rec-val">${vac.programa}</span></div>
-      <div class="ft-rec-row"><span class="ft-rec-label">Edad mínima:</span><span class="ft-rec-val">${vac.edad_min}</span></div>
-      <div class="ft-rec-row"><span class="ft-rec-label">Resguardo:</span><span class="ft-rec-val">${vac.resguardo}</span></div>
-      <div class="ft-rec-row"><span class="ft-rec-label">Almacenamiento:</span><span class="ft-rec-val">${vac.almacenamiento}</span></div>
-      ${vac.notas ? `<div class="ft-rec-row"><span class="ft-rec-label">Notas:</span><span class="ft-rec-val" style="font-style:italic;">${vac.notas}</span></div>` : ""}
-    </div>`;
-  }
-
-  panel.innerHTML = html;
-  actualizarBotonGenerar();
+  section.innerHTML = html;
+  container.appendChild(section);
 }
 
-function syncDia(id, val) {
-  const n = parseInt(val);
-  const r = document.getElementById(`range-${id}`);
-  const num = document.getElementById(`num-${id}`);
+function actualizarSemana(id, val) {
   const sem = document.getElementById(`sem-${id}`);
-  if (r) r.value = n;
-  if (num) num.value = n;
-  if (sem) sem.textContent = `Sem. ${Math.ceil(n / 7)}`;
+  if (sem) sem.textContent = `Sem. ${Math.ceil(Math.max(1, parseInt(val) || 1) / 7)}`;
 }
 
 function actualizarBotonGenerar() {
-  const diasPanels = document.querySelectorAll("[id^='dias-panel-']");
-  const hayVacunas = diasPanels.length > 0 &&
-    [...diasPanels].some(p => p.style.display !== "none");
+  const hayVacunas = document.querySelectorAll(".vac-radio-card.selected").length > 0;
   const btn = document.getElementById("btn-generar");
   if (btn) btn.disabled = !hayVacunas;
 }
@@ -938,51 +952,47 @@ let calLote = "";
 let calHayBronquitis = false;
 let calNextId = 0;
 
+function entradaCalendario(vac, vacId, enfId, diaVal, dosisLabel) {
+  const dia = Math.max(1, diaVal);
+  const semana = Math.ceil(dia / 7);
+  let fecha = "";
+  if (calFechaStr) {
+    const d = new Date(calFechaStr + "T12:00:00");
+    d.setDate(d.getDate() + dia - 1);
+    fecha = d.toLocaleDateString("es-CL", { day:"2-digit", month:"2-digit", year:"numeric" });
+  }
+  return {
+    id: calNextId++, dia, semana, fecha,
+    vacuna: vac.nombre, vacuna_id: vacId, dosis_label: dosisLabel,
+    protege: vac.protege.map(p => ENF_NOMBRES[p] || p).join(", "),
+    via: vac.via_label, proveedor: vac.proveedor, reg_sag: vac.reg_sag, notas: vac.notas || ""
+  };
+}
+
 function generar() {
   const sel = new Set([...document.querySelectorAll(".enf-card.on input")].map(cb => cb.value));
   calFechaStr = document.getElementById("fecha_inicio").value;
   calLote = document.getElementById("nombre_lote").value || "Lote";
   calHayBronquitis = sel.has("bronquitis");
-  const fechaInicio = calFechaStr ? new Date(calFechaStr + "T12:00:00") : null;
 
   calendarioActual = [];
   calNextId = 0;
+  const vacunasProcesadas = new Set();
 
-  // Recolectar vacunas y días seleccionados por el usuario
-  ENFERMEDADES.filter(e => sel.has(e.id)).forEach(enf => {
-    const radio = document.querySelector(`input[name="vac-${enf.id}"]:checked`);
-    if (!radio) return;
-    const vacId = radio.value;
+  // Iterar sobre todas las vacunas seleccionadas (múltiples por enfermedad)
+  document.querySelectorAll(".vac-radio-card.selected").forEach(card => {
+    const enfId = card.dataset.enf;
+    const vacId = card.dataset.vac;
+    if (vacunasProcesadas.has(vacId)) return; // deduplicar por vacId
     const vac = CATALOGO.find(v => v.id === vacId);
     const rangos = RANGOS[vacId];
     if (!vac || !rangos) return;
-
-    // Evitar duplicados (vacuna combinada que ya fue agregada)
-    if (calendarioActual.some(c => c.vacuna_id === vacId)) return;
+    vacunasProcesadas.add(vacId);
 
     rangos.forEach((r, i) => {
-      const inputId = `dia-${enf.id}-${vacId}-${i}`;
-      const numInput = document.getElementById(`num-${inputId}`);
-      const dia = numInput ? parseInt(numInput.value) : r.default;
-      const semana = Math.ceil(dia / 7);
-      let fecha = "";
-      if (fechaInicio) {
-        const d = new Date(fechaInicio);
-        d.setDate(d.getDate() + dia - 1);
-        fecha = d.toLocaleDateString("es-CL", { day:"2-digit", month:"2-digit", year:"numeric" });
-      }
-      calendarioActual.push({
-        id: calNextId++,
-        dia, semana, fecha,
-        vacuna: vac.nombre,
-        vacuna_id: vacId,
-        dosis_label: r.label,
-        protege: vac.protege.map(p => ENF_NOMBRES[p] || p).join(", "),
-        via: vac.via_label,
-        proveedor: vac.proveedor,
-        reg_sag: vac.reg_sag,
-        notas: vac.notas || ""
-      });
+      const numInput = document.getElementById(`num-dia-${enfId}-${vacId}-${i}`);
+      const dia = numInput ? parseInt(numInput.value) || r.default : r.default;
+      calendarioActual.push(entradaCalendario(vac, vacId, enfId, dia, r.label));
     });
   });
 
@@ -1027,8 +1037,9 @@ function renderTabla(cal, conFecha, lote, fechaStr, hayBronquitis) {
       <td style="font-family:monospace;font-size:11px;color:var(--muted);">${r.reg_sag || "—"}</td>
       <td style="font-size:11px;color:var(--muted);">${r.notas}</td>
       <td style="text-align:center;white-space:nowrap;">
-        <button class="btn-mover" onclick="moverDia(${r.id}, -7)" ${r.dia <= 7 ? "disabled" : ""} title="Retroceder 1 semana">−7d</button>
-        <button class="btn-mover" onclick="moverDia(${r.id}, 7)" title="Avanzar 1 semana">+7d</button>
+        <button class="btn-mover" onclick="moverDia(${r.id}, -7)" ${r.dia <= 7 ? "disabled" : ""} title="−7 días">−7d</button>
+        <button class="btn-mover" onclick="moverDia(${r.id}, 7)" title="+7 días">+7d</button>
+        <button class="btn-mover btn-del" onclick="eliminarFila(${r.id})" title="Eliminar fila">✕</button>
       </td>
     </tr>`;
   }).join("");
@@ -1050,6 +1061,67 @@ function moverDia(calId, delta) {
   calendarioActual.sort((a, b) => a.dia - b.dia);
   renderTabla(calendarioActual, !!calFechaStr, calLote, calFechaStr, calHayBronquitis);
 }
+
+function eliminarFila(calId) {
+  calendarioActual = calendarioActual.filter(e => e.id !== calId);
+  renderTabla(calendarioActual, !!calFechaStr, calLote, calFechaStr, calHayBronquitis);
+}
+
+function agregarFilaManual() {
+  const vacId = document.getElementById("agregar-vac-id").value;
+  const dosisLabel = document.getElementById("agregar-dosis-label").value.trim() || "Dosis";
+  const dia = Math.max(1, parseInt(document.getElementById("agregar-dia").value) || 1);
+  const vac = CATALOGO.find(v => v.id === vacId);
+  if (!vac) { alert("Selecciona una vacuna"); return; }
+  calendarioActual.push(entradaCalendario(vac, vacId, "", dia, dosisLabel));
+  calendarioActual.sort((a, b) => a.dia - b.dia);
+  document.getElementById("agregar-dosis-label").value = "";
+  document.getElementById("agregar-dia").value = "";
+  renderTabla(calendarioActual, !!calFechaStr, calLote, calFechaStr, calHayBronquitis);
+}
+
+function cargarReferencia() {
+  calFechaStr = document.getElementById("fecha_inicio").value;
+  calLote = document.getElementById("nombre_lote").value || "Lote";
+  calHayBronquitis = true;
+  calNextId = 0;
+  const REF = [
+    { vacId:"innovax_ilt",              dosis:"Dosis única",  dia:1   },
+    { vacId:"novamune",                 dosis:"Dosis única",  dia:1   },
+    { vacId:"nobilis_ib_ma5",           dosis:"1ª dosis",     dia:1   },
+    { vacId:"avipro_salmonella_vac_e",  dosis:"1ª dosis",     dia:1   },
+    { vacId:"cevac_bi_l",              dosis:"1ª dosis",     dia:28  },
+    { vacId:"avipro_salmonella_vac_e",  dosis:"2ª dosis",     dia:42  },
+    { vacId:"cevac_mass_l",            dosis:"Revacunación", dia:56  },
+    { vacId:"cevac_corymune_4k",       dosis:"1ª dosis",     dia:63  },
+    { vacId:"vectormune_fp_lt_ae",     dosis:"Dosis única",  dia:63  },
+    { vacId:"cevac_bi_l",              dosis:"2ª dosis",     dia:84  },
+    { vacId:"cevac_corymune_7k",       dosis:"Dosis única",  dia:98  },
+    { vacId:"avipro_salmonella_vac_e",  dosis:"3ª dosis",     dia:112 },
+    { vacId:"cevac_ibird",             dosis:"Revacunación", dia:126 },
+  ];
+  calendarioActual = REF.map(r => {
+    const vac = CATALOGO.find(v => v.id === r.vacId);
+    return vac ? entradaCalendario(vac, r.vacId, "", r.dia, r.dosis) : null;
+  }).filter(Boolean);
+  renderTabla(calendarioActual, !!calFechaStr, calLote, calFechaStr, true);
+  document.getElementById("btn-pdf").style.display = "inline-block";
+  document.getElementById("resultado").scrollIntoView({ behavior:"smooth", block:"start" });
+}
+
+// Poblar dropdown del formulario agregar
+(function() {
+  const sel = document.getElementById("agregar-vac-id");
+  if (!sel) return;
+  const opt0 = document.createElement("option");
+  opt0.value = ""; opt0.textContent = "— Seleccionar vacuna —";
+  sel.appendChild(opt0);
+  CATALOGO.forEach(v => {
+    const opt = document.createElement("option");
+    opt.value = v.id; opt.textContent = v.nombre;
+    sel.appendChild(opt);
+  });
+})();
 
 // ─── EXPORTAR PDF ──────────────────────────────────────────────────────────────
 function exportarPDF() {
@@ -1179,12 +1251,10 @@ function switchTab(tab) {
 
 // Vacunas conocidas pero SIN FT cargada aún (agregar aquí nuevas vacunas a medida que se identifiquen)
 const SIN_FT = [
-  { nombre: "CEVAC MD HVT",       tipo: "Vectorizada", proveedor: "Ceva Salud Animal Chile", protege: ["marek"],                    reg_sag: "" },
-  { nombre: "Avipro Salmonella",  tipo: "Viva",        proveedor: "Encipharm",               protege: ["salmonella"],               reg_sag: "" },
-  { nombre: "Innovax ILT-SB1",   tipo: "Vectorizada", proveedor: "MSD / Intervet Chile",    protege: ["marek","laringotraqueitis"],reg_sag: "" },
-  { nombre: "Nobilis IB 4/91",   tipo: "Viva",        proveedor: "MSD / Intervet Chile",    protege: ["bronquitis"],               reg_sag: "" },
-  { nombre: "Salmonella Vac E",  tipo: "Viva",        proveedor: "Elanco",                  protege: ["salmonella"],               reg_sag: "" },
-  { nombre: "Corymune 4 (autovacuna)",  tipo: "Inactivada",  proveedor: "Autovacuna",       protege: ["coriza"],                   reg_sag: "" },
+  { nombre: "CEVAC MD HVT",              tipo: "Vectorizada", proveedor: "Ceva Salud Animal Chile", protege: ["marek"],       reg_sag: "" },
+  { nombre: "Avipro Salmonella",         tipo: "Viva",        proveedor: "Encipharm",               protege: ["salmonella"],  reg_sag: "" },
+  { nombre: "Nobilis IB 4/91",          tipo: "Viva",        proveedor: "MSD / Intervet Chile",    protege: ["bronquitis"],  reg_sag: "" },
+  { nombre: "Corymune 4 (autovacuna)",  tipo: "Inactivada",  proveedor: "Autovacuna",              protege: ["coriza"],      reg_sag: "" },
 ];
 
 const ENF_NOMBRES = {
