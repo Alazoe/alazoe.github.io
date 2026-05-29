@@ -100,6 +100,26 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:var(--nav-h);display:
 .tool-desc{font-size:13px;color:rgba(255,255,255,0.4);line-height:1.65;}
 .tool-arrow{margin-top:20px;color:var(--green-accent);font-size:20px;transition:transform .2s;}
 .tool-card:hover .tool-arrow{transform:translateX(5px);}
+/* ── RECURSOS ── */
+#recursos{background:var(--white);}
+.recursos-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-top:60px;}
+.rec-card{background:var(--bg);border:1px solid var(--border);border-radius:24px;padding:36px;text-decoration:none;color:inherit;transition:all .3s;display:flex;flex-direction:column;position:relative;overflow:hidden;}
+.rec-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--green),var(--green-accent));transform:scaleX(0);transform-origin:left;transition:transform .35s;}
+.rec-card:hover{border-color:rgba(61,122,66,0.35);transform:translateY(-5px);box-shadow:0 16px 48px rgba(42,84,48,0.1);}
+.rec-card:hover::before{transform:scaleX(1);}
+.rec-card.disabled{opacity:.45;pointer-events:none;}
+.rec-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px;}
+.rec-icon{font-size:38px;line-height:1;}
+.rec-badge{font-size:10px;font-weight:600;padding:4px 12px;border-radius:100px;letter-spacing:.04em;}
+.rec-badge.live{background:rgba(92,158,97,0.12);color:#3d7a42;border:1px solid rgba(61,122,66,0.2);}
+.rec-badge.soon{background:rgba(184,134,11,0.1);color:#a07608;border:1px solid rgba(184,134,11,0.2);}
+.rec-cat{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);font-weight:500;margin-bottom:10px;}
+.rec-title{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--dark);line-height:1.2;margin-bottom:12px;letter-spacing:-.3px;}
+.rec-desc{font-size:14px;color:var(--muted);line-height:1.7;flex:1;}
+.rec-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:20px;}
+.rec-tag{font-size:10px;padding:3px 10px;border-radius:100px;background:var(--green-light);color:var(--green);font-weight:500;}
+.rec-cta{margin-top:24px;font-size:13px;font-weight:600;color:var(--green-mid);display:flex;align-items:center;gap:6px;transition:gap .2s;}
+.rec-card:hover .rec-cta{gap:10px;}
 #contacto{background:var(--cream);}
 .contacto-wrap{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;margin-top:60px;}
 .contacto-visual{position:relative;border-radius:24px;overflow:hidden;height:500px;}
@@ -151,6 +171,7 @@ footer p{font-size:12px;line-height:1.8;}
   .servicio-body{padding:36px 28px;}
   .servicio-num{font-size:48px;}
   .tools-grid{grid-template-columns:1fr;}
+  .recursos-grid{grid-template-columns:1fr;}
   .contacto-wrap{grid-template-columns:1fr;gap:40px;}
   .contacto-visual{height:320px;}
   footer{flex-direction:column;text-align:center;padding:28px 24px;}
@@ -164,6 +185,7 @@ footer p{font-size:12px;line-height:1.8;}
   <ul class="nav-links">
     <li><a href="#servicios">Servicios</a></li>
     <li><a href="#herramientas">Herramientas</a></li>
+    <li><a href="#recursos">Recursos</a></li>
     <li><a href="#contacto">Contacto</a></li>
     <li><a href="https://wa.me/56958956340" target="_blank" class="nav-cta">Contactar →</a></li>
   </ul>
@@ -359,6 +381,79 @@ footer p{font-size:12px;line-height:1.8;}
         <div class="tool-title">Auditoría Resolución SAG Chile</div>
         <div class="tool-desc">Pauta de cumplimiento normativo basada en resoluciones SAG vigentes para predios avícolas.</div>
       </div>
+    </div>
+  </div>
+</section>
+<section class="section" id="recursos">
+  <div class="section-inner">
+    <div class="section-eyebrow reveal">Biblioteca técnica</div>
+    <h2 class="section-title reveal">Recursos y<br>guías técnicas</h2>
+    <p class="section-desc reveal">Documentación clínica de referencia para productores avícolas del sur de Chile. Actualizada con criterio de campo.</p>
+    <div class="recursos-grid">
+
+      <a href="Recursos/Enfermedades-respiratorias.html" class="rec-card reveal">
+        <div class="rec-card-top">
+          <div class="rec-icon">🫁</div>
+          <span class="rec-badge live">● Disponible</span>
+        </div>
+        <div class="rec-cat">Guía técnica · Clínica</div>
+        <div class="rec-title">Enfermedades Respiratorias en Aves de Postura</div>
+        <div class="rec-desc">Anatomía del sistema respiratorio aviar, principales patógenos (IB, ILT, Mycoplasma, Coriza, Cólera, Newcastle, aMPV), Influenza Aviar con contexto Chile, factores ambientales y estrategia de prevención integral.</div>
+        <div class="rec-tags">
+          <span class="rec-tag">Diagnóstico</span>
+          <span class="rec-tag">Vacunación</span>
+          <span class="rec-tag">Bioseguridad</span>
+          <span class="rec-tag">Influenza Aviar</span>
+        </div>
+        <div class="rec-cta">Leer guía <span>→</span></div>
+      </a>
+
+      <a href="Recursos/Registros-avivet.html" class="rec-card reveal">
+        <div class="rec-card-top">
+          <div class="rec-icon">📊</div>
+          <span class="rec-badge live">● Disponible</span>
+        </div>
+        <div class="rec-cat">Guía técnica · Producción</div>
+        <div class="rec-title">Registros Clave en Granjas de Postura</div>
+        <div class="rec-desc">Los 7 registros esenciales para mantener la producción en meta: manejo de lote, peso corporal, consumo de alimento, postura Hen-Day, agua, mortalidad y condiciones ambientales. Con valores de referencia y alertas de campo.</div>
+        <div class="rec-tags">
+          <span class="rec-tag">Registros</span>
+          <span class="rec-tag">KPIs productivos</span>
+          <span class="rec-tag">Alerta temprana</span>
+        </div>
+        <div class="rec-cta">Leer guía <span>→</span></div>
+      </a>
+
+      <div class="rec-card disabled reveal">
+        <div class="rec-card-top">
+          <div class="rec-icon">🛡️</div>
+          <span class="rec-badge soon">Próximamente</span>
+        </div>
+        <div class="rec-cat">Guía técnica · Bioseguridad</div>
+        <div class="rec-title">Bioseguridad en Granjas de Postura</div>
+        <div class="rec-desc">Protocolos de control de ingreso, manejo de visitas, control de fauna silvestre y roedores, desinfección de galpones y gestión de cadáveres. Adaptado a las exigencias SAG y a la realidad del sur de Chile.</div>
+        <div class="rec-tags">
+          <span class="rec-tag">Bioseguridad</span>
+          <span class="rec-tag">SAG</span>
+          <span class="rec-tag">Protocolos</span>
+        </div>
+      </div>
+
+      <div class="rec-card disabled reveal">
+        <div class="rec-card-top">
+          <div class="rec-icon">🌾</div>
+          <span class="rec-badge soon">Próximamente</span>
+        </div>
+        <div class="rec-cat">Guía técnica · Nutrición</div>
+        <div class="rec-title">Nutrición y Alimentación en Postura Comercial</div>
+        <div class="rec-desc">Requerimientos nutricionales por fase productiva, formulación de dietas para el sur de Chile, manejo de comederos, calidad de materias primas y relación entre nutrición y calidad de cáscara.</div>
+        <div class="rec-tags">
+          <span class="rec-tag">Nutrición</span>
+          <span class="rec-tag">Formulación</span>
+          <span class="rec-tag">Cáscara</span>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
