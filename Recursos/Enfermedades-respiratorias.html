@@ -217,6 +217,7 @@ h3::after{content:'';flex:1;height:1px;background:var(--rule)}
     <li><a href="#anatomia">Anatomía</a></li>
     <li><a href="#via-alta">Vía Alta</a></li>
     <li><a href="#factores">Factores de Riesgo</a></li>
+    <li><a href="#traquea">Tráquea</a></li>
     <li><a href="#via-baja">Vía Baja</a></li>
     <li><a href="#influenza">Influenza</a></li>
     <li><a href="#enfermedades">Enfermedades</a></li>
@@ -271,7 +272,7 @@ h3::after{content:'';flex:1;height:1px;background:var(--rule)}
         </li>
         <li>
           <div class="ic-mark">③</div>
-          <div class="ic-body"><strong>Causas múltiples:</strong> virus, bacterias y parásitos, frecuentemente con coinfecciones que complican el cuadro clínico.</div>
+          <div class="ic-body"><strong>Causas múltiples:</strong> virus y bacterias, frecuentemente en coinfección, junto a factores ambientales que abren la puerta.</div>
         </li>
         <li>
           <div class="ic-mark">④</div>
@@ -299,7 +300,7 @@ h3::after{content:'';flex:1;height:1px;background:var(--rule)}
       <li><a href="#traquea"><span class="toc-n">04</span>Enfermedades de la tráquea</a></li>
       <li><a href="#via-baja"><span class="toc-n">05</span>Tracto respiratorio inferior</a></li>
       <li><a href="#influenza"><span class="toc-n">06</span>Influenza Aviar</a></li>
-      <li><a href="#enfermedades"><span class="toc-n">07</span>IB, Cólera y Mycoplasma</a></li>
+      <li><a href="#enfermedades"><span class="toc-n">07</span>Enfermedades frecuentes</a></li>
       <li><a href="#prevencion"><span class="toc-n">08</span>Prevención integral</a></li>
     </ul>
   </nav>
@@ -397,9 +398,9 @@ h3::after{content:'';flex:1;height:1px;background:var(--rule)}
           <div class="dc-abbr">IBV — Gammacoronavirus</div>
           <ul class="dc-signs">
             <li>Rinitis, estornudos, secreción ocular</li>
-            <li>Caída de postura y mala cáscara</li>
-            <li>Formas renales en pollas jóvenes</li>
-            <li>Portadores crónicos que eliminan el virus por meses</li>
+            <li>Afecta el oviducto: cáscara pálida, rugosa o deformada</li>
+            <li>Tropismo digestivo: muestrear tráquea + cecal</li>
+            <li>Portadores que eliminan el virus por semanas a meses</li>
           </ul>
         </div>
         <div class="disease-card viral">
@@ -411,6 +412,28 @@ h3::after{content:'';flex:1;height:1px;background:var(--rule)}
             <li>Respiración con boca abierta (jadeo)</li>
             <li>Graznido patognomónico y estertores</li>
             <li>Mortalidad moderada a alta</li>
+          </ul>
+        </div>
+        <div class="disease-card viral">
+          <div class="dc-type">Viral</div>
+          <div class="dc-name">Metaneumovirus Aviar</div>
+          <div class="dc-abbr">aMPV — Síndrome de Cabeza Hinchada (SHS)</div>
+          <ul class="dc-signs">
+            <li>Senos infraorbitarios y cabeza edematosos</li>
+            <li>Conjuntivitis, espuma ocular, descarga nasal</li>
+            <li>Caída de postura hasta 70% en ponedoras</li>
+            <li>Mortalidad alta cuando hay infección bacteriana secundaria</li>
+          </ul>
+        </div>
+        <div class="disease-card viral">
+          <div class="dc-type">Viral · Declaración obligatoria SAG</div>
+          <div class="dc-name">Newcastle</div>
+          <div class="dc-abbr">NDV — APMV-1 · Neumoencefalitis aviar</div>
+          <ul class="dc-signs">
+            <li>Forma respiratoria: estertores, tos, jadeo</li>
+            <li>Forma nerviosa: torticolis, parálisis, tremores</li>
+            <li>Caída de postura y huevos deformes</li>
+            <li>Mortalidad variable según la cepa (0–100%)</li>
           </ul>
         </div>
         <div class="disease-card bacterial">
@@ -467,11 +490,15 @@ h3::after{content:'';flex:1;height:1px;background:var(--rule)}
       <div class="kpis">
         <div class="kpi">
           <div class="kpi-val">10</div>
-          <div class="kpi-desc">ppm: nivel máximo de amoníaco recomendado en el ambiente</div>
+          <div class="kpi-desc">ppm: nivel máximo recomendado en el ambiente del galpón</div>
         </div>
         <div class="kpi">
           <div class="kpi-val">0</div>
           <div class="kpi-desc">El ideal: si puede olerlo, ya es demasiado alto</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-val">&gt;20</div>
+          <div class="kpi-desc">ppm: efectos sistémicos — supresión hormonal e inflamación crónica</div>
         </div>
         <div class="kpi">
           <div class="kpi-val">3×</div>
@@ -481,7 +508,7 @@ h3::after{content:'';flex:1;height:1px;background:var(--rule)}
 
       <div class="alert">
         <div class="alert-label">Alerta ambiental</div>
-        <p><strong>El amoníaco paraliza los cilios.</strong> Sin cilios funcionales, el polvo, virus, bacterias y hongos inhalaados quedan atrapados y pueden colonizar los sacos aéreos, pulmones y huesos. El nivel máximo recomendado es 10 ppm — si lo puede oler al entrar al galpón, ya está por encima del límite. Revise la ventilación, la densidad de aves y el estado de la cama.</p>
+        <p><strong>El amoníaco paraliza los cilios.</strong> Sin cilios funcionales, el polvo, virus, bacterias y hongos inhalados quedan atrapados y pueden colonizar los sacos aéreos, pulmones y huesos. El nivel máximo recomendado es 10 ppm — si lo puede oler al entrar al galpón, ya está por encima del límite. Por encima de 20 ppm los efectos son sistémicos: supresión de hormonas reproductivas e inflamación crónica de las mucosas. En el sur de Chile, el frío invernal dificulta la ventilación y potencia estos efectos de forma aditiva — el binomio frío + amoníaco es un factor de riesgo específico de la zona.</p>
       </div>
 
       <h3>Causas de amoníaco elevado</h3>
@@ -511,7 +538,7 @@ h3::after{content:'';flex:1;height:1px;background:var(--rule)}
         </div>
       </div>
 
-      <p class="lead">La tráquea puede ser afectada por virus, parásitos y bacterias. Algunos cuadros son levemente perceptibles; otros causan obstrucción severa y mortalidad elevada en poco tiempo.</p>
+      <p class="lead">La tráquea puede ser afectada por virus y bacterias. Algunos cuadros son levemente perceptibles; otros causan obstrucción severa y mortalidad elevada en poco tiempo.</p>
 
       <h3>Laringotraqueítis Infecciosa (ILT)</h3>
       <p>Causada por un herpesvirus, la ILT produce <strong>traqueítis hemorrágica severa</strong> con formación de tapones purulentos o caseosos que obstruyen la vía aérea. En la forma grave, las aves respiran con la boca abierta, emiten un graznido característico (patognomónico) y mueren por asfixia. La mortalidad puede ser moderada a alta en pocos días.</p>
@@ -522,15 +549,12 @@ h3::after{content:'';flex:1;height:1px;background:var(--rule)}
         <p>El graznido áspero característico de la ILT, junto con la respiración con boca abierta y el sacudido de la cabeza intentando expulsar los tapones traqueales, es un hallazgo clínico que no debe pasarse por alto. La necropsia confirma el diagnóstico: tráquea con hemorragias y exudado caseoso.</p>
       </div>
 
-      <h3>Syngamus trachea (Gusano de la tráquea)</h3>
-      <p>Este nematodo parásito habita en la tráquea de las aves. Se transmite a través de lombrices de tierra u otros hospedadores intermediarios invertebrados. Produce respiración dificultosa (respiración con boca abierta) y traqueítis. Se controla fácilmente con desparasitación, pero es más frecuente en sistemas mixtos con aves de caza o producción al aire libre.</p>
-
       <h3>Viruela Aviar — forma diftérica</h3>
       <p>La forma húmeda de la viruela aviar puede producir lesiones nodulares en las mucosas de la boca, faringe, laringe y tráquea. Estas lesiones pueden dificultar la respiración, la deglución y la ingesta de alimento. En casos graves puede causar asfixia y mortalidad. Las infecciones bacterianas secundarias son frecuentes.</p>
       <ul class="blist">
         <li>Transmisión: contacto directo con aves infectadas, ambiente contaminado o picadura de mosquitos</li>
         <li>Control: vacunación en el programa de crianza (punción alar) y control de vectores</li>
-        <li>En planteles comerciales es rara; más frecuente en aves de traspatio</li>
+        <li>En planteles comerciales es rara; más frecuente en aves de traspatio y sistemas al aire libre</li>
       </ul>
     </section>
 
@@ -634,31 +658,37 @@ h3::after{content:'';flex:1;height:1px;background:var(--rule)}
       </ul>
 
       <div class="tip">
+        <div class="tip-label">Contexto Chile</div>
+        <p>Durante el brote de H5N1 de 2022–2023, la onda de infección avanzó de norte a sur a razón de ~32 km por día. Los Ríos y Los Lagos — con alta densidad de humedales y cisnes — fueron zonas de alta presión. Los <strong>sistemas con acceso al exterior</strong> presentan un riesgo de introducción significativamente mayor que los sistemas cerrados, por el potencial de contacto directo o indirecto con fauna silvestre. La bioseguridad perimetral y el control de aves silvestres son las medidas de mayor impacto en estos sistemas.</p>
+      </div>
+
+      <div class="tip">
         <div class="tip-label">Diagnóstico diferencial</div>
         <p>La Influenza Aviar comparte signos con muchas otras enfermedades: Newcastle, IB, ILT, Cólera Aviar. No es posible diferenciarlas solo por clínica. Ante cualquier cuadro de alta mortalidad aguda o signología sistémica severa, consulte a su veterinario y gestione diagnóstico de laboratorio urgente.</p>
       </div>
     </section>
 
-    <!-- SECTION 7: IB, CÓLERA Y MYCOPLASMA -->
+    <!-- SECTION 7: ENFERMEDADES FRECUENTES -->
     <section class="section" id="enfermedades">
       <div class="sec-head">
         <div class="sec-icon">🧫</div>
         <div class="sec-title">
           <div class="sec-num">07 · Enfermedades frecuentes</div>
-          <h2>Bronquitis Infecciosa, Cólera y Mycoplasma</h2>
+          <h2>Enfermedades frecuentes en el sur de Chile</h2>
         </div>
       </div>
 
-      <p class="lead">Estas tres enfermedades representan los desafíos respiratorios más frecuentes en planteles de postura en el sur de Chile. Conocer sus características permite actuar a tiempo.</p>
+      <p class="lead">Estas enfermedades representan los desafíos respiratorios más frecuentes en planteles de postura de Los Ríos, La Araucanía y Los Lagos. Conocer sus características particulares permite actuar a tiempo.</p>
 
       <h3>Bronquitis Infecciosa (IB)</h3>
-      <p>Causada por un gammacoronavirus, la IB es probablemente la enfermedad respiratoria más prevalente en Chile. El virus circula por vía aerógena y puede sobrevivir en equipos, ropa y vehículos. Las aves recuperadas pueden eliminar el virus durante meses.</p>
+      <p>Causada por un gammacoronavirus, la IB es probablemente la enfermedad respiratoria más prevalente en Chile. El virus circula por vía aerógena y puede sobrevivir en equipos, ropa y vehículos. Las aves recuperadas pueden eliminar el virus durante semanas a meses.</p>
       <p>En aves de postura, la caída de producción, los huevos deformes o con cáscara blanda pueden ser los únicos signos perceptibles. Los signos respiratorios suelen pasarse por alto.</p>
+      <p>Un aspecto clave para planteles de postura: el IBV no es solo una enfermedad respiratoria. Su <strong>tropismo por el oviducto</strong> explica por qué en aves adultas la principal manifestación suele ser la caída de calidad de cáscara — cáscaras pálidas, rugosas o deformes — sin signos respiratorios evidentes. El virus afecta las estructuras formadoras de cáscara de forma subclínica, con alteraciones funcionales que pueden aparecer días después de la infección y sin lesiones histológicas visibles en ese momento. Adicionalmente, el <strong>tropismo digestivo</strong> del IBV supera al respiratorio en frecuencia, lo que tiene implicancias directas para el muestreo: la muestra solo traqueal subestima la circulación viral. <strong>La muestra correcta es tráquea + cecal.</strong></p>
       <ul class="blist">
         <li>Incluirla siempre en el programa de vacunación de crianza y renovar durante la postura (cada 8 semanas si hay presión de campo)</li>
-        <li>Conocer qué variantes circulan en la región y elegir la vacuna adecuada</li>
-        <li>En pollas jóvenes: formas nefropatogénicas con alta mortalidad renal</li>
-        <li>Infecciones secundarias por E. coli son frecuentes y agravan el cuadro</li>
+        <li>Verificar qué variantes circulan en la región y elegir la vacuna adecuada al genotipo local</li>
+        <li>En pollas jóvenes: formas nefropatogénicas con alta mortalidad renal (dependientes del genotipo)</li>
+        <li>Infecciones secundarias por E. coli son frecuentes y agravan significativamente el cuadro</li>
       </ul>
 
       <h3>Cólera Aviar (FC)</h3>
@@ -672,6 +702,7 @@ h3::after{content:'';flex:1;height:1px;background:var(--rule)}
 
       <h3>Micoplasmosis (MG)</h3>
       <p><em>Mycoplasma gallisepticum</em> se asocia a enfermedad respiratoria crónica. Puede estar presente en el plantel sin producir signos clínicos hasta que un evento de estrés (cambio de fase, transporte, coinfección viral) desencadene el cuadro. Se disemina por aves silvestres portadoras y por fómites.</p>
+      <p>Un punto importante: todas las vacunas vivas disponibles para MG producen <strong>eliminación vacunal</strong> (shedding), lo que genera positividad en ELISA, SPA y PCR post-vacunación. Es necesario considerar el historial vacunal antes de interpretar un resultado serológico positivo como infección de campo.</p>
 
       <div class="kpis">
         <div class="kpi">
@@ -691,6 +722,16 @@ h3::after{content:'';flex:1;height:1px;background:var(--rule)}
       <h3>Coriza Infecciosa (IC)</h3>
       <p>Causada por <em>Avibacterium paragallinarum</em>, la Coriza Infecciosa puede presentarse de forma aguda con alta morbilidad (gran parte del plantel afectado) pero mortalidad generalmente baja. La principal consecuencia es la reducción de la postura y el crecimiento.</p>
       <p>Las aves recuperadas son portadoras de por vida y pueden reintroducir la bacteria en planteles susceptibles. Para el control es clave la vacunación con autovacuna de serogrupo local y el estricto control de ingresos de aves nuevas.</p>
+      <p>Un aspecto diagnóstico importante: las <strong>cepas NAD-independientes</strong> son hoy las más frecuentes en campo y pueden generar un <strong>falso negativo en PCR estándar hasta en el 33% de los casos</strong>. Un resultado negativo no descarta la infección si la presentación clínica es compatible. Las bacterinas disponibles son serovar-específicas (A, B, C) y no generan protección cruzada — es fundamental identificar el serogrupo circulante en la zona antes de vacunar.</p>
+
+      <h3>Ornithobacterium rhinotracheale (ORT)</h3>
+      <p>Presente en el sur de Chile con un <strong>patrón marcadamente estacional</strong> (mayo–agosto), <em>Ornithobacterium rhinotracheale</em> actúa principalmente como co-infector: potencia y prolonga cuadros respiratorios causados por IBV, Mycoplasma o Newcastle sin producir enfermedad grave por sí solo. El frío y la alta humedad relativa del invierno austral favorecen su presentación y persistencia. Su diagnóstico requiere cultivo bacteriano o PCR específico; no está incluido en los paneles diagnósticos estándar, por lo que frecuentemente pasa inadvertido en cuadros que se atribuyen a MG o IBV.</p>
+      <ul class="blist">
+        <li>Signos: estertores traqueales, descarga nasal, traqueítis fibrinosa en casos avanzados</li>
+        <li>Co-infector frecuente de IBV, MG, Newcastle y <em>E. coli</em> — agrava cuadros que de otro modo serían leves</li>
+        <li>El frío y la humedad del sur de Chile favorecen su presentación en el período mayo–agosto</li>
+        <li>No existe vacuna comercial disponible; el control depende de la bioseguridad y la calidad ambiental</li>
+      </ul>
     </section>
 
     <!-- SECTION 8: PREVENCIÓN -->
@@ -709,11 +750,15 @@ h3::after{content:'';flex:1;height:1px;background:var(--rule)}
       <ul class="elist">
         <li>
           <span class="elist-num">IB</span>
-          <span class="elist-text"><strong>Bronquitis Infecciosa:</strong> debe estar en el programa base de crianza. Evalúe refuerzo cada 8 semanas durante postura si existe presión de campo.</span>
+          <span class="elist-text"><strong>Bronquitis Infecciosa:</strong> debe estar en el programa base de crianza. Evalúe refuerzo cada 8 semanas durante postura si existe presión de campo. Verifique que el genotipo vacunal coincida con el circulante en la zona.</span>
         </li>
         <li>
           <span class="elist-num">ILT</span>
-          <span class="elist-text"><strong>Laringotraqueítis:</strong> incluirla en crianza si hay historial en la zona o en planteles vecinos. Vacuna vectorizada (HVT-ILT) en el día 1.</span>
+          <span class="elist-text"><strong>Laringotraqueítis:</strong> incluirla en crianza si hay historial en la zona o planteles vecinos. Vacuna vectorizada (HVT-ILT) en el día 1 o aplicada en spray / agua a la edad recomendada.</span>
+        </li>
+        <li>
+          <span class="elist-num">ND</span>
+          <span class="elist-text"><strong>Newcastle:</strong> parte del programa base. Revise la compatibilidad del programa de crianza con la cepa vacunal y la presión de campo en la zona.</span>
         </li>
         <li>
           <span class="elist-num">FC</span>
@@ -721,42 +766,42 @@ h3::after{content:'';flex:1;height:1px;background:var(--rule)}
         </li>
         <li>
           <span class="elist-num">IC</span>
-          <span class="elist-text"><strong>Coriza Infecciosa:</strong> autovacuna con serogrupo local. Fundamental en planteles con historial o en zonas donde ya se ha aislado.</span>
+          <span class="elist-text"><strong>Coriza Infecciosa:</strong> autovacuna con serogrupo local. Identifique el serovar (A, B o C) antes de vacunar — las bacterinas no generan protección cruzada.</span>
         </li>
         <li>
           <span class="elist-num">FP</span>
-          <span class="elist-text"><strong>Viruela Aviar:</strong> vacuna vectorizada (punción alar) si hay riesgo en la zona, especialmente en sistemas al aire libre con mosquitos.</span>
+          <span class="elist-text"><strong>Viruela Aviar:</strong> vacuna vectorizada por punción alar en crianza. Indicada si hay riesgo en la zona, especialmente en sistemas al aire libre con presencia de mosquitos.</span>
         </li>
       </ul>
 
       <h3>Pilar 2: Calidad ambiental</h3>
       <ul class="blist">
-        <li>Mantener amoníaco por debajo de 10 ppm — si lo huele, es demasiado alto</li>
-        <li>Ventilación adecuada para la carga animal y la época del año</li>
+        <li>Mantener amoníaco por debajo de 10 ppm — si lo huele al ingresar al galpón, ya es demasiado alto</li>
+        <li>Ventilación adecuada para la carga animal y la época del año, especialmente en invierno</li>
         <li>Cama seca: corregir pérdidas en bebederos y condensación en techos</li>
-        <li>Controlar polvo en suspensión, especialmente en sistemas con cama</li>
-        <li>Temperatura y humedad relativa estables dentro de rangos recomendados</li>
-        <li>Verificar calidad y nivel de Vitamina A en la dieta</li>
+        <li>Controlar polvo en suspensión, especialmente en sistemas con cama de viruta o paja</li>
+        <li>Temperatura y humedad relativa estables dentro de rangos recomendados para la edad</li>
+        <li>Verificar calidad y nivel de Vitamina A en la dieta de forma periódica</li>
       </ul>
 
       <h3>Pilar 3: Bioseguridad</h3>
       <ul class="blist">
         <li>Ingreso controlado de personas, vehículos y equipos al galpón</li>
-        <li>Cuarentena de aves nuevas antes de incorporarlas al plantel</li>
-        <li>Control de aves silvestres, roedores e insectos (especialmente mosquitos)</li>
+        <li>Cuarentena de aves nuevas antes de incorporarlas al plantel existente</li>
+        <li>Control de aves silvestres, roedores e insectos (especialmente mosquitos en verano)</li>
         <li>Disposición correcta de cadáveres y purines</li>
-        <li>Higiene estricta de bebederos, comederos y equipos compartidos</li>
-        <li>Registro de mortalidades, signología y cambios productivos para detección temprana</li>
+        <li>Higiene estricta de bebederos, comederos y equipos compartidos entre galpones</li>
+        <li>Registro semanal de mortalidades, signología y cambios productivos para detección temprana</li>
       </ul>
 
       <div class="alert">
         <div class="alert-label">Ante cualquier brote respiratorio</div>
-        <p>No automédique ni cambie el programa de vacunación sin diagnóstico. Contacte a su médico veterinario para obtener muestras adecuadas (hisopados traqueales, oculares, órganos frescos en necropsia) y enviarlas a laboratorio. Un diagnóstico certero permite elegir el tratamiento y la vacuna correctos.</p>
+        <p>No automédique ni cambie el programa de vacunación sin diagnóstico. Contacte a su médico veterinario para obtener muestras adecuadas (hisopados traqueales, cecales, órganos frescos en necropsia) y enviarlas a laboratorio. Un diagnóstico certero permite elegir el tratamiento y la vacuna correctos, y evitar el gasto en intervenciones que no apuntan al agente real.</p>
       </div>
 
       <div class="tip">
         <div class="tip-label">Monitoreo continuo</div>
-        <p>Lleve registro semanal de mortalidad, consumo de agua y alimento, y producción de huevos. Las tendencias a la baja en agua y alimento, o el aumento de rechazos por cáscara, suelen preceder en días a los signos respiratorios. La detección temprana permite intervenir antes de que el brote se expanda.</p>
+        <p>Lleve registro semanal de mortalidad, consumo de agua y alimento, y producción de huevos. Las tendencias a la baja en agua y alimento, o el aumento de rechazos por cáscara, suelen preceder en días a los signos respiratorios. La detección temprana permite intervenir antes de que el brote se expanda al plantel completo.</p>
       </div>
 
     </section>
