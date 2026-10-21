@@ -1,11 +1,11 @@
 # AviVet — Sitio GitHub Pages
 
 Sitio estático desplegado en **avivet.cl** (GitHub Pages, repo `Alazoe/alazoe.github.io`).
-Clon local en `/tmp/avivet-site/`. Push a `main` publica automáticamente.
+Clon local en `~/alazoe-github-io/` (no usar los clones de `~/Documents`). Push a `main` publica automáticamente.
 
 ## Aplicación principal: Calendarios de Vacunación (`vacunas/index.html`)
 
-Un solo archivo HTML+JS (~1300 líneas). Sin backend, sin build. Todo el catálogo vive en el JS del archivo.
+Un solo archivo HTML+JS (~1900 líneas). Sin backend, sin build. Todo el catálogo vive en el JS del archivo.
 
 ### Estructura del JS
 
@@ -27,14 +27,30 @@ Un solo archivo HTML+JS (~1300 líneas). Sin backend, sin build. Todo el catálo
 1. Selecciona enfermedades (tarjetas toggle)
 2. Elige vacuna por enfermedad (agrupadas por tipo — vectorizadas primero)
 3. Ajusta días con sliders; se muestra la recomendación de la FT
-4. "Generar calendario" → tabla con botones ±7d por fila para mover semanas
-5. Exportar PDF (jsPDF + autotable vía CDN)
+4. "Generar calendario" (o "Calendario AviVet" / "Programa Nutringen") → tabla con botones ±7d por fila
+5. **Revisión técnica** automática sobre la tabla (`revisarCalendario()`), recalculada en cada `renderTabla()`
+6. Exportar PDF (jsPDF + autotable vía CDN), incluye la revisión técnica y el anexo ND/BI
+
+Pestañas: Generar Calendario · Estado de Fichas Técnicas · Resumen de Fichas (por enfermedad, con casilla "revisada" en localStorage y PDF).
+
+### Revisión técnica del calendario
+
+`revisarCalendario(cal, inicioPosturaDia)` devuelve alertas `{nivel, filas, dias, titulo, texto, fuente}` con nivel `conflicto` / `aviso` / `nota` y fuente `FT` o `Criterio técnico` (siempre declarar cuál). Reglas:
+
+- Edad mínima y rango por dosis (`RANGOS`), LT-VAX ±3 días de vivas ND/BI, un solo vector HVT (`HVT_VECTOR`)
+- Inactivadas con ND/BI: viva previa del mismo agente, ≥4 semanas antes
+- Postura: `postura:false` desde el inicio de postura (campo "Inicio de postura", semana, default 20) y días mínimos previos en `PRE_POSTURA{}`
+- Avipro Salmonella Vac E: otros productos a ≤14 días (FT SAG; la FT europea lo limita a antibacterianos ±3 días)
+- Mismo día: dos vivas respiratorias (distinto laboratorio vía `labDe()`), salvo pares en `COMPATIBLES[]` declarados por FT/laboratorio; misma enfermedad dos veces solo entre vacunas de la misma clase (viva/inactivada)
+- Nota: vivas respiratorias a <10 días entre sí
+
+Al agregar una vacuna con restricciones de su FT: sumarla a `PRE_POSTURA`, `COMPATIBLES` o `HVT_VECTOR` según corresponda.
 
 ### Reglas al editar el catálogo
 
 - Agregar vacuna nueva: entrada en `CATALOGO[]` + entrada en `RANGOS{}` con el mismo `id`.
 - `id` en snake_case, único. `tipo` debe ser exactamente: `"Viva"`, `"Viva (congelada)"`, `"Inactivada"`, `"Vectorizada"`, `"Complejo inmune"`.
-- Vacunas sin FT SAG disponible van a `SIN_FT[]`, no a `CATALOGO[]`.
+- Vacunas sin FT SAG disponible van a `SIN_FT[]`, no a `CATALOGO[]`. Excepción: si hay ficha del laboratorio (no SAG) con datos verificados, va a `CATALOGO[]` con `ft_pendiente:true` y `reg_sag:"—"`; así es seleccionable pero cuenta como "Sin FT" (caso Nobilis IB 4-91).
 - Para vacunas de dosis única en día fijo (ej. día 1): usar `min:1, max:1, default:1` en RANGOS. El slider se renderiza deshabilitado.
 - Al agregar enfermedad nueva: agregar a `ENFERMEDADES[]`, `ENF_NOMBRES{}` y el CSS `.enf-tag.tag-{id}`.
 
@@ -100,14 +116,13 @@ Programa real usado en Chile. Útil para validar rangos y coherencia de días.
 
 ## Vacunas presentes en el calendario de referencia sin FT SAG cargada
 
-Están en `SIN_FT[]` en el código. Agregar a `CATALOGO[]` cuando se obtenga la FT oficial:
+Están en `SIN_FT[]` en el código (o en `CATALOGO[]` con `ft_pendiente:true`). Pasar a `CATALOGO[]` normal cuando se obtenga la FT SAG:
 
-| Vacuna | Tipo | Proveedor | Protege |
-|--------|------|-----------|---------|
-| Innovax ILT-SB1 | Vectorizada | MSD / Intervet Chile | Marek + Laringotraqueitis |
-| Nobilis IB 4/91 | Viva | MSD / Intervet Chile | Bronquitis (cepa 4/91) |
-| Salmonella Vac E | Viva | Elanco | Salmonella |
-| Corymune 4 (autovacuna) | Inactivada | Autovacuna | Coriza |
+| Vacuna | Tipo | Proveedor | Protege | Estado |
+|--------|------|-----------|---------|--------|
+| Nobilis IB 4-91 | Viva | MSD / Intervet Chile | Bronquitis (cepa 4/91) | `ft_pendiente` — datos de ficha MSD, falta FT SAG y N° de registro |
+| CEVAC MD HVT | Vectorizada | Ceva | Marek | `SIN_FT` |
+| Corymune 4 (autovacuna) | Inactivada | Autovacuna | Coriza | `SIN_FT` |
 
 ---
 
@@ -122,10 +137,10 @@ Están en `SIN_FT[]` en el código. Agregar a `CATALOGO[]` cuando se obtenga la 
 
 ```bash
 # Editar en
-/tmp/avivet-site/vacunas/index.html
+~/alazoe-github-io/vacunas/index.html
 
 # Publicar
-git -C /tmp/avivet-site add vacunas/index.html
-git -C /tmp/avivet-site commit -m "mensaje"
-git -C /tmp/avivet-site push origin main
+git -C ~/alazoe-github-io add vacunas/index.html
+git -C ~/alazoe-github-io commit -m "mensaje"
+git -C ~/alazoe-github-io push origin main
 ```

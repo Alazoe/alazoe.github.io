@@ -250,6 +250,29 @@ tbody tr:hover td { background: var(--green-light); }
 #tab-estado { display: none; }
 
 
+
+/* REVISIÓN TÉCNICA */
+.rev-panel { margin-bottom:16px; }
+.rev-head { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+.rev-head strong { font-family:'Fraunces',serif; font-size:14px; color:var(--green); margin-right:6px; }
+.rev-chip { font-size:11px; font-weight:700; padding:3px 10px; border-radius:100px; }
+.rc-conflicto { background:#fdecea; color:#b71c1c; }
+.rc-aviso { background:#fff8e1; color:#8c6400; }
+.rc-nota { background:#e8f4fd; color:#0d47a1; }
+.rc-ok { background:#e8f5e9; color:#2e7d32; }
+.rev-item { border-left:4px solid; border-radius:6px; padding:8px 12px; margin-bottom:6px; font-size:12px; }
+.rev-item.conflicto { border-color:#c62828; background:#fdecea; }
+.rev-item.aviso { border-color:#f9a825; background:#fffbea; }
+.rev-item.nota { border-color:#64b5f6; background:#f1f8fe; }
+.rev-tit { font-weight:700; color:var(--dark); }
+.rev-dias { font-family:monospace; font-size:11px; color:var(--muted); margin-right:6px; }
+.rev-txt { color:var(--text); margin-top:2px; line-height:1.45; }
+.rev-fuente { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--muted); margin-left:6px; }
+.rev-mas { font-size:12px; }
+tbody tr.fila-conflicto td { background:#fdecea !important; }
+tbody tr.fila-aviso td { background:#fffbea !important; }
+.dia-flag { font-size:11px; margin-left:3px; cursor:help; }
+
 /* RESUMEN DE FICHAS */
 #tab-resumen { display: none; }
 .res-barra { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:14px; }
@@ -476,6 +499,10 @@ tbody tr:hover td { background: var(--green-light); }
         <label>Fecha de ingreso (día 1)</label>
         <input type="date" id="fecha_inicio">
       </div>
+      <div class="form-group">
+        <label>Inicio de postura (semana de edad)</label>
+        <input type="number" id="inicio_postura" value="20" min="14" max="30" onchange="if (calendarioActual.length) renderTabla(calendarioActual, !!calFechaStr, calLote, calFechaStr, calHayBronquitis)">
+      </div>
     </div>
   </div>
 
@@ -511,6 +538,7 @@ tbody tr:hover td { background: var(--green-light); }
         <div class="result-meta" id="result-meta"></div>
       </div>
     </div>
+    <div class="rev-panel" id="rev-panel"></div>
     <div class="tabla-wrap">
       <table id="tabla-cal">
         <thead id="tabla-head"></thead>
@@ -1136,6 +1164,168 @@ function calendarioIncluyeNdBi(cal) {
   return cal.some(r => /Bronquitis|Newcastle/.test(r.protege));
 }
 
+// ─── REVISIÓN TÉCNICA DEL CALENDARIO ──────────────────────────────────────────
+// Cruza las aplicaciones entre sí y contra las fichas técnicas. Cada alerta declara su fuente:
+// "FT" (ficha técnica del catálogo) o "Criterio técnico" (práctica general, no escrita en la FT).
+const RESP_ENF = ["bronquitis", "newcastle", "laringotraqueitis"];
+const HVT_VECTOR = ["vectormune_hvt_ndv", "vectormune_hvt_lt", "innovax_ilt", "innofusion_nd_ibd"];
+const COMPATIBLES = [
+  ["nobilis_ib_ma5", "nobilis_nd_clone30", "La ficha Nobilis las declara compatibles"],
+  ["nobilis_ib_ma5", "nobilis_gumboro_d78", "La ficha Nobilis las declara compatibles"],
+  ["nobilis_nd_clone30", "nobilis_gumboro_d78", "La ficha Nobilis las declara compatibles"],
+  ["nobilis_ib_ma5", "nobilis_ib_4_91", "MSD las propone juntas (protectotipo Mass + 4/91)"],
+  ["cevac_mass_l", "cevac_ibird", "La ficha de Ibird permite mezclarla con Cevac Mass L en spray (cobertura 793/B + Mass)"]
+];
+// Días mínimos entre la aplicación y el inicio de postura, según cada FT
+const PRE_POSTURA = {
+  nobilis_ae_pox: 28, vectormune_fp_lt_ae: 28, vectormune_fp_lt: 28, novamune: 28,
+  nobilis_rt_ib_multi_nd_eds: 28, nobilis_ib_multi_nd_eds: 28, nobilis_ib_nd_eds: 28,
+  cevac_corymune_4k: 28, nobilis_coryza: 28,
+  avipro_salmonella_vac_e: 21, avipro_salmonella_duo: 21, cevac_nd_ib_eds_k: 21,
+  cevac_corymune_7k: 14
+};
+const NIVEL_ORDEN = { conflicto: 0, aviso: 1, nota: 2 };
+
+function inicioPosturaDia() {
+  const sem = parseInt(document.getElementById("inicio_postura")?.value);
+  return sem > 0 ? sem * 7 : null;
+}
+function labDe(v) {
+  const p = v.proveedor || "";
+  const labs = [[/MSD|Intervet/, "MSD"], [/Ceva/, "Ceva"], [/HIPRA|Veterquímica/, "HIPRA"], [/Elanco/, "Elanco"], [/Zoetis/, "Zoetis"], [/Calier|Agrovet/, "Calier"]];
+  const m = labs.find(([re]) => re.test(p));
+  return m ? m[1] : p.split("/")[0].trim();
+}
+function esInactivada(v) { return /inactiv/i.test(v.tipo); }
+function tipoClase(v) { return esInactivada(v) ? "inactivada" : /^viva/i.test(v.tipo) ? "viva" : "otra"; }
+function esVivaResp(v) { return /^viva/i.test(v.tipo) && v.protege.some(e => RESP_ENF.includes(e)); }
+function compatibleDecl(a, b) {
+  const c = COMPATIBLES.find(([x, y]) => (x === a && y === b) || (x === b && y === a));
+  return c ? c[2] : null;
+}
+function listaFilas(fs) { return fs.map(f => `${f.v.nombre} (día ${f.r.dia})`).join(", "); }
+
+function revisarCalendario(cal, inicioPostura) {
+  const out = [];
+  const vistos = new Set();
+  const add = (nivel, fs, titulo, texto, fuente) => {
+    const ids = [...new Set(fs.map(f => f.r.id))];
+    const clave = titulo + ids.sort().join(",");
+    if (vistos.has(clave)) return;
+    vistos.add(clave);
+    out.push({ nivel, filas: ids, dias: [...new Set(fs.map(f => f.r.dia))].sort((a, b) => a - b), titulo, texto, fuente });
+  };
+  const filas = cal.map(r => ({ r, v: CATALOGO.find(x => x.id === r.vacuna_id) })).filter(f => f.v);
+
+  filas.forEach(f => {
+    const { r, v } = f;
+    // Edad mínima y rango de la dosis
+    const rangos = RANGOS[v.id] || [];
+    if (rangos.length) {
+      const minEdad = Math.min(...rangos.map(x => x.min));
+      const rango = rangos.find(x => x.label === r.dosis_label);
+      if (r.dia < minEdad)
+        add("conflicto", [f], `${v.nombre}: antes de la edad mínima`, `Aplicada el día ${r.dia}; la ficha la indica desde el día ${minEdad} (${v.edad_min}).`, "FT");
+      else if (rango && (r.dia < rango.min || r.dia > rango.max))
+        add("aviso", [f], `${v.nombre} (${r.dosis_label}): fuera del rango de la ficha`, `Está en el día ${r.dia}; el rango para esta dosis es día ${rango.min}–${rango.max}.`, "FT");
+    }
+    // Postura
+    if (inicioPostura) {
+      if (v.postura === false && r.dia >= inicioPostura)
+        add("conflicto", [f], `${v.nombre}: no se usa durante la postura`, `Día ${r.dia}, con inicio de postura en el día ${inicioPostura}.`, "FT");
+      else if (PRE_POSTURA[v.id] && r.dia > inicioPostura - PRE_POSTURA[v.id])
+        add("aviso", [f], `${v.nombre}: muy cerca del inicio de postura`, `La ficha pide aplicarla al menos ${PRE_POSTURA[v.id]} días antes de la postura (a más tardar el día ${inicioPostura - PRE_POSTURA[v.id]}); está en el día ${r.dia}.`, "FT");
+    }
+    // Inactivadas con ND/BI: primovacunación viva previa
+    if (esInactivada(v)) {
+      ["bronquitis", "newcastle"].filter(e => v.protege.includes(e)).forEach(e => {
+        const vivas = filas.filter(o => !esInactivada(o.v) && o.v.protege.includes(e) && o.r.dia < r.dia);
+        const enf = ENF_NOMBRES[e];
+        if (!vivas.length)
+          add("conflicto", [f], `${v.nombre}: falta primovacunación viva de ${enf}`, `La ficha exige vacunas vivas de ${enf} antes de esta inactivada y no hay ninguna antes del día ${r.dia}.`, "FT");
+        else if (!vivas.some(o => o.r.dia <= r.dia - 28))
+          add("aviso", [f, ...vivas], `${v.nombre}: viva de ${enf} a menos de 4 semanas`, `Última viva: ${listaFilas(vivas)}. Las fichas de las inactivadas combinadas piden ≥4 semanas entre la última viva y la inactivada (Nobilis IB+ND+EDS: mejores resultados con 6).`, "FT");
+      });
+    }
+  });
+
+  // LT-VAX: 3 días antes y después sin vivas de ND/BI
+  filas.filter(f => f.v.id === "lt_vax").forEach(lt => {
+    const cerca = filas.filter(o => o !== lt && /^viva/i.test(o.v.tipo) && o.v.protege.some(e => e === "bronquitis" || e === "newcastle") && Math.abs(o.r.dia - lt.r.dia) <= 3);
+    if (cerca.length)
+      add("conflicto", [lt, ...cerca], `LT-VAX (día ${lt.r.dia}) junto a vivas de Newcastle o Bronquitis`, `La ficha pide separarla 3 días antes y después. Cercanas: ${listaFilas(cerca)}.`, "FT");
+  });
+
+  // Un solo vector HVT por ave
+  const hvt = filas.filter(f => HVT_VECTOR.includes(f.v.id));
+  if (new Set(hvt.map(f => f.v.id)).size > 1)
+    add("conflicto", hvt, "Más de una vacuna vectorizada HVT", `${[...new Set(hvt.map(f => f.v.nombre))].join(" + ")}: el ave admite un solo vector HVT y el segundo no se establece. La ficha de Innofusion lo indica explícitamente.`, "FT / criterio técnico");
+
+  // Avipro Salmonella Vac E: otros productos cercanos
+  filas.filter(f => f.v.id === "avipro_salmonella_vac_e").forEach(s => {
+    const cerca = filas.filter(o => o !== s && o.v.id !== s.v.id && Math.abs(o.r.dia - s.r.dia) <= 14);
+    if (cerca.length)
+      add("aviso", [s, ...cerca], `Avipro Salmonella Vac E (día ${s.r.dia}) con otros productos a ≤14 días`,
+        `La ficha SAG cargada dice «no administrar otros productos 14 días antes ni después». La ficha europea (VMD) lo limita a antibacterianos 3 días antes y después, permite el mismo día que Marek inyectable (HVT/Rispens) y prohíbe mezclarla con otras vacunas. Cercanas: ${listaFilas(cerca)}.`, "FT");
+  });
+
+  // Cruces el mismo día
+  const porDia = {};
+  filas.forEach(f => (porDia[f.r.dia] = porDia[f.r.dia] || []).push(f));
+  Object.values(porDia).forEach(g => {
+    for (let i = 0; i < g.length; i++) for (let j = i + 1; j < g.length; j++) {
+      const a = g[i], b = g[j], dia = a.r.dia;
+      if (a.v.id === b.v.id) { add("aviso", [a, b], `${a.v.nombre} repetida el día ${dia}`, "La misma vacuna aparece dos veces el mismo día.", "Calendario"); continue; }
+      if (a.v.id === "lt_vax" || b.v.id === "lt_vax") continue;
+      const decl = compatibleDecl(a.v.id, b.v.id);
+      const ambasResp = esVivaResp(a.v) && esVivaResp(b.v);
+      // Vectorizadas y complejos inmunes se combinan a propósito con vivas (inmunidad sistémica + local): no son duplicado
+      const claseIgual = tipoClase(a.v) === tipoClase(b.v) && tipoClase(a.v) !== "otra";
+      const comunes = claseIgual ? a.v.protege.filter(e => b.v.protege.includes(e)) : [];
+      if (decl) {
+        add("nota", [a, b], `${a.v.nombre} + ${b.v.nombre} el día ${dia}: compatibles`, `${decl}.`, "FT");
+        continue;
+      }
+      if (ambasResp) {
+        const la = labDe(a.v), lb = labDe(b.v);
+        add("aviso", [a, b], `Dos vivas respiratorias el día ${dia}: ${a.v.nombre} + ${b.v.nombre}`,
+          (la === lb ? `Mismo laboratorio (${la}), pero sus fichas no las declaran compatibles.` : `Distintos laboratorios (${la} y ${lb}): ninguna de las dos fichas tiene datos de uso conjunto.`) +
+          " No mezclarlas en la misma solución. Los virus vacunales pueden interferir entre sí: lo habitual es usar una combinada o separarlas 10–14 días.", "Criterio técnico");
+        continue;
+      }
+      if (comunes.length)
+        add("aviso", [a, b], `${comunes.map(e => ENF_NOMBRES[e]).join(" y ")} cubierta dos veces el día ${dia}`, `${a.v.nombre} y ${b.v.nombre} protegen contra lo mismo el mismo día. Revisar si es intencional.`, "Calendario");
+    }
+  });
+
+  // Vivas respiratorias con intervalo corto (días distintos)
+  const resp = filas.filter(f => esVivaResp(f.v) && f.v.id !== "lt_vax");
+  for (let i = 0; i < resp.length; i++) for (let j = i + 1; j < resp.length; j++) {
+    const a = resp[i], b = resp[j], d = Math.abs(a.r.dia - b.r.dia);
+    if (d > 0 && d < 10 && !compatibleDecl(a.v.id, b.v.id))
+      add("nota", [a, b], `Vivas respiratorias separadas por ${d} día${d > 1 ? "s" : ""}: ${a.v.nombre} y ${b.v.nombre}`, "Intervalo corto: la segunda puede prender peor por interferencia con la primera. Lo habitual entre vivas respiratorias es 10–14 días.", "Criterio técnico");
+  }
+
+  return out.sort((x, y) => NIVEL_ORDEN[x.nivel] - NIVEL_ORDEN[y.nivel] || x.dias[0] - y.dias[0]);
+}
+
+function renderRevision(rev) {
+  const panel = document.getElementById("rev-panel");
+  if (!panel) return;
+  const n = k => rev.filter(a => a.nivel === k).length;
+  const chips = [["conflicto", "conflicto", "conflictos"], ["aviso", "aviso", "avisos"], ["nota", "nota", "notas"]]
+    .filter(([k]) => n(k)).map(([k, s1, s2]) => `<span class="rev-chip rc-${k}">${n(k)} ${n(k) === 1 ? s1 : s2}</span>`).join("");
+  const item = a => `<div class="rev-item ${a.nivel}">
+      <div><span class="rev-dias">Día ${a.dias.join(", ")}</span><span class="rev-tit">${resEsc(a.titulo)}</span><span class="rev-fuente">${resEsc(a.fuente)}</span></div>
+      <div class="rev-txt">${resEsc(a.texto)}</div>
+    </div>`;
+  const principales = rev.filter(a => a.nivel !== "nota");
+  const notas = rev.filter(a => a.nivel === "nota");
+  panel.innerHTML = `<div class="rev-head"><strong>Revisión técnica</strong>${chips || '<span class="rev-chip rc-ok">✓ Sin cruces ni restricciones detectadas</span>'}</div>
+    ${principales.map(item).join("")}
+    ${notas.length ? `<details class="rev-mas"${principales.length ? "" : " open"}><summary style="cursor:pointer;color:var(--muted);margin:4px 0 6px;">Ver ${notas.length} nota${notas.length > 1 ? "s" : ""} (compatibilidades e intervalos)</summary>${notas.map(item).join("")}</details>` : ""}`;
+}
+
 // ─── GENERAR CALENDARIO ───────────────────────────────────────────────────────
 let calendarioActual = [];
 let calFechaStr = "";
@@ -1216,9 +1406,19 @@ function renderTabla(cal, conFecha, lote, fechaStr, hayBronquitis) {
     <th style="text-align:center;">Ajustar</th>
   </tr>`;
 
+  const revision = revisarCalendario(cal, inicioPosturaDia());
+  renderRevision(revision);
+  const nivelFila = {}, motivoFila = {};
+  revision.filter(a => a.nivel !== "nota").forEach(a => a.filas.forEach(id => {
+    if (nivelFila[id] !== "conflicto") nivelFila[id] = a.nivel;
+    (motivoFila[id] = motivoFila[id] || []).push(a.titulo);
+  }));
+
   body.innerHTML = cal.map(r => {
-    return `<tr>
-      <td class="dia-cell">${r.dia}</td>
+    const nv = nivelFila[r.id];
+    const flag = nv ? `<span class="dia-flag" title="${resEsc(motivoFila[r.id].join(" · "))}">${nv === "conflicto" ? "⛔" : "⚠"}</span>` : "";
+    return `<tr class="${nv ? "fila-" + nv : ""}">
+      <td class="dia-cell">${r.dia}${flag}</td>
       <td class="sem-cell">${r.semana}</td>
       ${conFecha ? `<td class="fecha-cell">${r.fecha}</td>` : ""}
       <td class="vacuna-cell">${r.vacuna}</td>
@@ -1394,6 +1594,24 @@ function exportarPDF() {
   doc.setTextColor(150);
   doc.setFont("helvetica", "italic");
   doc.text("* El programa puede variar según zona geográfica, historia sanitaria del plantel y disponibilidad de vacunas. | avivet.cl", 10, finalY);
+
+  const revPdf = revisarCalendario(calendarioActual, inicioPosturaDia());
+  if (revPdf.length) {
+    let y = finalY + 6;
+    if (y > 170) { doc.addPage(); y = 14; }
+    const etiqueta = { conflicto: "CONFLICTO", aviso: "Aviso", nota: "Nota" };
+    const color = { conflicto: [253, 236, 234], aviso: [255, 251, 234], nota: [241, 248, 254] };
+    doc.autoTable({
+      startY: y,
+      head: [[{ content: "REVISIÓN TÉCNICA DEL CALENDARIO", colSpan: 4, styles: { halign: "left" } }], ["Nivel", "Día(s)", "Observación", "Fuente"]],
+      body: revPdf.map(a => [etiqueta[a.nivel], a.dias.join(", "), a.titulo + "\n" + a.texto, a.fuente]),
+      styles: { fontSize: 7, cellPadding: 2, font: "helvetica", valign: "top" },
+      headStyles: { fillColor: [42, 84, 48], textColor: 255 },
+      columnStyles: { 0: { cellWidth: 20, fontStyle: "bold" }, 1: { cellWidth: 18 }, 3: { cellWidth: 28 } },
+      didParseCell: d => { if (d.section === "body") d.cell.styles.fillColor = color[revPdf[d.row.index].nivel]; },
+      margin: { left: 10, right: 10 }
+    });
+  }
 
   if (calendarioIncluyeNdBi(calendarioActual)) agregarAnexoPDF(doc);
 
