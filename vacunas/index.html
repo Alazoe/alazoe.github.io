@@ -371,6 +371,7 @@ tbody tr.fila-aviso td { background:#fffbea !important; }
 .enf-tag.tag-eds { background: #fff8e1; color: #f57f17; }
 .enf-tag.tag-coriza { background: #fdf3e7; color: #a0522d; }
 .enf-tag.tag-coccidiosis { background: #f1f8e9; color: #558b2f; }
+.enf-tag.tag-hci { background: #fce4ec; color: #ad1457; }
 .tipo-badge { font-size: 11px; padding: 2px 8px; border-radius: 100px; font-weight: 600; }
 .tipo-viva2 { background: #e8f5e9; color: #2e7d32; }
 .tipo-inact { background: #fff3e0; color: #e65100; }
@@ -419,6 +420,16 @@ tbody tr.fila-aviso td { background:#fffbea !important; }
 .vac-radio-card { border:2px solid var(--border); border-radius:10px; padding:10px 14px; cursor:pointer; transition:all 0.18s; display:flex; align-items:flex-start; gap:10px; min-width:200px; max-width:280px; }
 .vac-radio-card:hover { border-color:var(--green-accent); }
 .vac-radio-card.selected { border-color:var(--green); background:var(--green-light); }
+.vac-card-lab { display:inline-block; font-size:10px; font-weight:700; border-radius:4px; padding:1px 6px; margin-bottom:3px; background:#eceff1; color:#455a64; }
+.vac-card-lab.lab-ceva { background:#e3f2fd; color:#1565c0; }
+.vac-card-lab.lab-msd { background:#e0f2f1; color:#00695c; }
+.vac-card-lab.lab-boehringer { background:#ede7f6; color:#4527a0; }
+.lab-filtro { display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin-bottom:14px; font-size:12px; color:var(--muted); }
+.lab-filtro button { border:1px solid var(--border); background:#fff; border-radius:14px; padding:4px 12px; font-size:12px; cursor:pointer; }
+.lab-filtro button.on { background:var(--green); border-color:var(--green); color:#fff; }
+.lab-oculta { display:none !important; }
+.lab-vacio { font-size:12px; color:var(--muted); font-style:italic; padding:4px 0 10px; }
+.planes-lab { font-size:12px; color:var(--muted); margin-top:10px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
 .vac-radio-card input[type=radio] { margin-top:3px; accent-color:var(--green); flex-shrink:0; }
 .vac-card-info { flex:1; }
 .vac-card-nombre { font-size:13px; font-weight:700; color:var(--dark); }
@@ -519,6 +530,7 @@ tbody tr.fila-aviso td { background:#fffbea !important; }
   <!-- PASO 3: SELECCIÓN DE VACUNAS -->
   <div class="panel" id="panel-vacunas" style="display:none; margin-top:0;">
     <div class="panel-title">Selección de Vacunas y Días de Aplicación</div>
+    <div class="lab-filtro" id="lab-filtro"></div>
     <div id="vacuna-selectors"></div>
   </div>
 
@@ -528,6 +540,11 @@ tbody tr.fila-aviso td { background:#fffbea !important; }
     <button class="btn-primary" onclick="cargarReferencia()" style="background:var(--green-mid);" title="Carga el calendario de referencia AviVet para pollas de reemplazo">Calendario AviVet</button>
     <button class="btn-primary" onclick="cargarProgramaNutringen()" style="background:var(--green-mid);" title="Programa clásico usado hoy en Chile (Nutringen) para pollas de reemplazo">Programa Nutringen</button>
     <button class="btn-pdf" id="btn-pdf" onclick="exportarPDF()">⬇ Exportar PDF</button>
+  </div>
+  <div class="planes-lab">
+    <span>Planes de un solo laboratorio (pollas de reemplazo, desde sus fichas SAG):</span>
+    <button class="btn-primary" onclick="cargarPlanLab('ceva')" style="background:#1565c0;">Plan Ceva</button>
+    <button class="btn-primary" onclick="cargarPlanLab('msd')" style="background:#00695c;">Plan MSD</button>
   </div>
 
   <!-- RESULTADO -->
@@ -644,7 +661,8 @@ const ENFERMEDADES = [
   { id: "encefalomielitis",  nombre: "Encefalomielitis Aviar (AE)",     desc: "Picornavirus. Sistema nervioso en pollitos. Vacunación en reproductoras." },
   { id: "eds",               nombre: "Síndrome Caída de Postura (EDS)", desc: "Adenovirus aviar. Caída brusca de postura y decoloración de cáscara. Vacunación pre-postura con inactivada." },
   { id: "coriza",            nombre: "Coriza Infecciosa",               desc: "Avibacterium paragallinarum. Sinusitis, edema facial, caída de postura." },
-  { id: "coccidiosis",       nombre: "Coccidiosis Aviar",               desc: "Eimeria spp. Enteritis hemorrágica. Común en broilers y reemplazos." }
+  { id: "coccidiosis",       nombre: "Coccidiosis Aviar",               desc: "Eimeria spp. Enteritis hemorrágica. Común en broilers y reemplazos." },
+  { id: "hci",               nombre: "Hepatitis por Cuerpos de Inclusión", desc: "Adenovirus aviar tipo 4 (FAdV-4). Hepatitis y síndrome de hidropericardio; afecta pollos y pollas jóvenes." }
 ];
 
 // Catálogo completo desde fichas técnicas oficiales SAG
@@ -655,7 +673,7 @@ const CATALOGO = [
   { id:"nobilis_gumboro_d78",  nombre:"Nobilis Gumboro D78",      tipo:"Viva",       protege:["gumboro"],                    cepa:"D78",                                        via_label:"Oral / Spray / Óculo-nasal",            edad_min:"Día 1 (spray) / 7-28 d (oral)", programa:"Día 7-28 oral. Si AM variables: 2 dosis con 1 semana intervalo.",    resguardo:"Cero días",                               almacenamiento:"2-8°C. No congelar. Diluyente: 15-30°C.", proveedor:"MSD / Intervet Chile",   reg_sag:"1124-B",  postura:null,   notas:"Compatible con Nobilis IB Ma5 y ND Clone 30." },
   { id:"bronipra_1",           nombre:"Bronipra 1",               tipo:"Viva",       protege:["bronquitis"],                 cepa:"H120 (Massachusetts)",                       via_label:"Agua de bebida / Nebulización",         edad_min:"Día 1 (spray) / Día 7 (agua)", programa:"1 dosis/ave. Nebulización desde el 1er día; agua de bebida desde la 1ª semana.", resguardo:"Cero días",                               almacenamiento:"2-8°C. No congelar.",                     proveedor:"Veterquímica / HIPRA",   reg_sag:"0003-B",  postura:false,  notas:"No administrar durante postura. No coadministrar con otros productos." },
   { id:"nobilis_ib_ma5",       nombre:"Nobilis IB Ma5",           tipo:"Viva",       protege:["bronquitis"],                 cepa:"Ma5 Massachusetts",                          via_label:"Spray / Ocular-nasal / Agua",           edad_min:"Día 1",         programa:"Desde día 1. Ponedoras: día 1 + revacunación.",                       resguardo:"Cero días",                               almacenamiento:"2-8°C. No congelar. Diluyente: 15-30°C.", proveedor:"MSD / Intervet Chile",   reg_sag:"1155-B",  postura:true,   notas:"No causa reacciones adversas durante postura. Compatible con Nobilis Gumboro D78 y ND Clone 30." },
-  { id:"nobilis_ib_4_91",        nombre:"Nobilis IB 4-91",          tipo:"Viva",       protege:["bronquitis"],                 cepa:"4/91 (793B) — variante, ≥10³·⁶ DIE50",       via_label:"Spray / Gota ocular-nasal / Agua (desde 7 d)", edad_min:"Día 1", programa:"1 dosis/ave desde día 1 (spray, ocular o nasal); por agua desde los 7 días. MSD plantea combinarla con Nobilis IB Ma5 (protectotipo Mass + 4/91).", resguardo:"Cero días", almacenamiento:"2-8°C. Protegido de la luz. No congelar. Usar en 2 h tras reconstituir.", proveedor:"MSD / Intervet Chile", reg_sag:"—", postura:null, ft_pendiente:true, notas:"Datos de la ficha MSD internacional; ficha SAG Chile aún no cargada y N° de registro sin confirmar — verificar antes de indicar en un programa. Spray: 250-400 mL de agua/1.000 dosis. Agua: leche descremada 2 g/L ayuda a conservar el virus." },
+  { id:"nobilis_ib_4_91",        nombre:"Nobilis IB 4-91",          tipo:"Viva",       protege:["bronquitis"],                 cepa:"Variante 4-91 (grupo 793/B) ≥10³·⁶ EID50",       via_label:"Spray / Óculo-nasal / Agua (desde 7 d)", edad_min:"Día 1 (spray, óculo-nasal) / 7 días (agua)", programa:"Pollas: revacunar cada 6 semanas para mantener la inmunidad. Inmunidad desde las 3 semanas; dura 6 semanas.", resguardo:"Cero días", almacenamiento:"2-8°C. Protegido de la luz. No congelar. Usar en 2 h tras reconstituir.", proveedor:"MSD / Intervet Chile", reg_sag:"2703-B", postura:true, notas:"FT: segura en gallinas de postura y reproductoras. Se puede mezclar con Nobilis IB Ma5 (spray u óculo-nasal desde el día 1): protección Mass + 793/B. Usar solo con diagnóstico de cepa 793/B relevante en la zona." },
   { id:"nobilis_ma5_clone30",  nombre:"Nobilis Ma5 + Clone 30",   tipo:"Viva",       protege:["bronquitis","newcastle"],      cepa:"BI Ma5 Mass + Newcastle Clone 30",           via_label:"Oral / Spray / Ocular / Nasal",         edad_min:"Día 1",         programa:"Desde el primer día de vida",                                        resguardo:"Cero días",                               almacenamiento:"2-8°C. No congelar. Diluyente: 15-30°C.", proveedor:"MSD / Intervet Chile",   reg_sag:"1158-B",  postura:false,  notas:"Combinada BI + Newcastle en una sola aplicación. No usar durante postura." },
   { id:"nobilis_ib_nd_eds",    nombre:"Nobilis IB + ND + EDS",    tipo:"Inactivada",  protege:["bronquitis","newcastle","eds"],      cepa:"BI M41 Mass + Newcastle Clone 30 + EDS BC14",    via_label:"IM / SC (0.5 mL)",                      edad_min:"16 semanas",    programa:"1 dosis. 16-20 sem, mínimo 4 sem antes de postura. Requiere primovacunación viva.", resguardo:"Cero días",                               almacenamiento:"2-8°C. No congelar. Usar en 3 h de abierto.",  proveedor:"MSD / Intervet Chile",   reg_sag:"1149-B",  postura:false,  notas:"Triple inactivada. Mejores resultados 6+ semanas después de primovacunación viva." },
   { id:"cevac_mass_l",          nombre:"CEVAC MASS L",             tipo:"Viva",        protege:["bronquitis"],                  cepa:"Mass B48 (Massachusetts)",                   via_label:"Agua / Intraocular / Spray",            edad_min:"Día 1",         programa:"Primovacunación días 1-4 (ocular o spray). Refuerzo 3-4 sem después (spray o agua). Pollas: 2º refuerzo a las 10-12 sem.",                                    resguardo:"Cero días",                               almacenamiento:"2-8°C. Protegido de la luz.",             proveedor:"Ceva Salud Animal",      reg_sag:"299-B",   postura:null,   notas:"Cepa Mass B48. 20×1.000 y 20×2.500 dosis. Aprobado SAG 17-01-2026." },
@@ -690,7 +708,29 @@ const CATALOGO = [
   // ── Nuevas vacunas 2026-05 (segunda carga) ────────────────────────────────────
   { id:"avipro_salmonella_duo",  nombre:"AviPro Salmonella DUO",      tipo:"Viva",        protege:["salmonella"],                  cepa:"S. Enteritidis Sm24/Rif12/Ssq + S. Typhimurium Nal2/Rif 0/Rit, 1×10⁸–6×10⁸ UFC", via_label:"Oral (agua de bebida)",   edad_min:"Día 1", programa:"3 dosis: día 1, 6-8 sem, 16-18 sem (mín. 3 sem antes postura). Pavos: según programa.", resguardo:"Pollas: 21 días (carne y huevos). Pavos: 70 días post 2ª dosis.", almacenamiento:"2-8°C. No congelar. Proteger de la luz solar directa.", proveedor:"Elanco Chile", reg_sag:"2402-B", postura:false, notas:"Cubre S. Enteritidis + S. Typhimurium (doble protección). Aprobado SAG 09-01-2026." },
   { id:"avipro_salmonella_vac_e", nombre:"Avipro Salmonella Vac E",   tipo:"Viva",        protege:["salmonella"],                  cepa:"S. enteritidis Sm24/Rif12/Ss, 1×10⁸–6×10⁸ ufc",                    via_label:"Oral (agua de bebida)",   edad_min:"Día 1", programa:"Pollas reemplazo: 3 dosis — día 1, 6-8 sem, 16-18 sem (≥3 sem antes postura). Broiler: dosis única día 1. Período de descanso: inicio y final de la pelecha.", resguardo:"21 días", almacenamiento:"2-8°C. No congelar. Proteger de la luz. Usar en 4 h de reconstituida.", proveedor:"Elanco Chile", reg_sag:"2155-B", postura:false, notas:"Solo vía oral (agua de bebida). No vacunar durante postura ni 3 sem previas. No administrar otros productos 14 días antes ni después. Las aves excretan la cepa vacunal 14 días. Cepa sensible a eritromicina (la de campo no): permite diferenciarlas por antibiograma. Aprobado SAG 24-02-2021." },
-  { id:"innovax_ilt",             nombre:"INNOVAX ILT",                tipo:"Vectorizada", protege:["marek","laringotraqueitis"],   cepa:"HVT recombinante serotipo 3 con 2 genes LT, >2248 UPF",             via_label:"In ovo (0.05 mL) / SC (0.2 mL) día 1", edad_min:"Día 1 / In ovo (18 días embrión)", programa:"Dosis única. In ovo (embrión 18 días, 0.05 mL) o SC día 1 (0.2 mL).", resguardo:"Cero días", almacenamiento:"Nitrógeno líquido (ampollas). Diluyente: temperatura ambiente.", proveedor:"Zoetis Chile", reg_sag:"—", postura:null, notas:"Protección simultánea Marek + Laringotraqueitis. Usar dentro de 2 h de preparado." }
+  { id:"innovax_ilt",             nombre:"INNOVAX ILT",                tipo:"Vectorizada", protege:["marek","laringotraqueitis"],   cepa:"HVT recombinante serotipo 3 con 2 genes LT, >2248 UPF",             via_label:"In ovo (0.05 mL) / SC (0.2 mL) día 1", edad_min:"Día 1 / In ovo (18 días embrión)", programa:"Dosis única. In ovo (embrión 18 días, 0.05 mL) o SC día 1 (0.2 mL).", resguardo:"Cero días", almacenamiento:"Nitrógeno líquido (ampollas). Diluyente: temperatura ambiente.", proveedor:"MSD / Intervet (ficha Perú)", reg_sag:"—", postura:null, notas:"Protección simultánea Marek + Laringotraqueitis. Usar dentro de 2 h de preparado." },
+  // ── Boehringer Ingelheim (FT SAG descargadas 2026-10, medicamentos.sag.gob.cl) ──
+  { id:"bi_nd_lasota",        nombre:"Newcastle La Sota (Boehringer)", tipo:"Viva", protege:["newcastle"], cepa:"Tipo B1, cepa La Sota ≥10⁵·⁵ EID50", via_label:"Intraocular (desde día 1) / Spray o agua (desde 14 d)", edad_min:"Día 1 (ocular) / 14 días (spray, agua)", programa:"Dosis única por FT. Especie de destino: pollas de reemplazo.", resguardo:"21 días", almacenamiento:"2-7°C. No congelar. Usar todo una vez abierto.", proveedor:"Boehringer Ingelheim Chile", reg_sag:"1169-B", postura:false, notas:"Sin nombre comercial en el SAG. Agua: 29 g de leche descremada por 3,8 L; sin desinfectantes 72 h antes. FT: no administrar otros productos 14 días antes ni después." },
+  { id:"bi_nd_b1",            nombre:"Newcastle B1 (Boehringer)", tipo:"Viva", protege:["newcastle"], cepa:"Tipo B1, cepa B1 ≥10⁵·⁵ EID50", via_label:"Intraocular / Spray gota gruesa (día 1) / Agua (desde 14 d)", edad_min:"Día 1", programa:"Dosis única por FT. Especie de destino: pollas de reemplazo.", resguardo:"21 días", almacenamiento:"2-7°C. No congelar.", proveedor:"Boehringer Ingelheim Chile", reg_sag:"1170-B", postura:false, notas:"Sin nombre comercial en el SAG. Spray día 1: 70 mL de agua sin cloro por 1.000 aves. FT: no administrar otros productos 14 días antes ni después." },
+  { id:"bi_nd_b1_ib_mass",    nombre:"Newcastle B1 + Bronquitis Mass (Boehringer)", tipo:"Viva", protege:["bronquitis","newcastle"], cepa:"ND B1 ≥10⁵·⁵ EID50 + BI tipo Mass ≥10²·⁷ EID50", via_label:"Spray gota gruesa (desde 7 d) / Agua (desde 14 d)", edad_min:"7 días", programa:"Dosis única por FT. Pollas de reemplazo y broiler.", resguardo:"21 días", almacenamiento:"2-7°C. No congelar.", proveedor:"Boehringer Ingelheim Chile", reg_sag:"1173-B", postura:false, notas:"Sin nombre comercial en el SAG. FT: no diluir, mezclar ni coadministrar con otro producto; nada 14 días antes ni después." },
+  { id:"bi_ib_mass",          nombre:"Bronquitis Mass (Boehringer)", tipo:"Viva", protege:["bronquitis"], cepa:"BI tipo Mass ≥10²·⁵ EID50", via_label:"Intraocular / Spray / Agua", edad_min:"Día 1 (ocular) / 7 días (spray, agua)", programa:"Dosis única por FT. Pollas de reemplazo y broiler.", resguardo:"21 días", almacenamiento:"2-7°C. No congelar. Diluyente 15-30°C.", proveedor:"Boehringer Ingelheim Chile", reg_sag:"1176-B", postura:false, notas:"Sin nombre comercial en el SAG. La FT no nombra la cepa Mass. FT: nada 14 días antes ni después." },
+  { id:"bi_ib_h120",          nombre:"Bronquitis H120 comprimido (Boehringer)", tipo:"Viva", protege:["bronquitis"], cepa:"Mass H120 10³·⁷–10⁵·⁰ EID50", via_label:"Agua de bebida / Spray (nebulización)", edad_min:"Día 1", programa:"Pollas: 1ª al día 1, refuerzo 4 semanas después, 2º refuerzo desde las 8 semanas. Inmunidad a los 21 días; dura 6 semanas.", resguardo:"Cero días", almacenamiento:"2-8°C. Usar en 2 h tras reconstituir.", proveedor:"Boehringer Ingelheim Chile", reg_sag:"2775-B", postura:false, notas:"Comprimido efervescente; sin nombre comercial en el SAG. Muy frecuente: ronquidos bronquiales 5-14 días post vacunación, sin dificultad respiratoria. FT: nada 14 días antes ni después." },
+  { id:"gallivac_ib88_neo",   nombre:"Gallivac IB88 Neo", tipo:"Viva", protege:["bronquitis"], cepa:"Variante CR88121 (grupo CR88 = 793/B) ≥10⁴·⁰ EID50", via_label:"Spray (nebulización)", edad_min:"Pollas: 10-15 días (broiler: día 1)", programa:"Pollas: 10-15 días y revacunar a las 8-12 semanas. Inmunidad a las 3 semanas; dura 5 semanas.", resguardo:"Cero días", almacenamiento:"2-8°C. Usar en 2 h tras reconstituir.", proveedor:"Boehringer Ingelheim Chile", reg_sag:"2731-B", postura:null, notas:"Comprimido efervescente. Usar solo con diagnóstico de cepa CR88 relevante en la zona; no reemplaza a la vacuna Mass. Frecuente: signos respiratorios leves hasta 17 días." },
+  { id:"lt_blen",             nombre:"LT-Blen", tipo:"Viva", protege:["laringotraqueitis"], cepa:"Cepa Hudson ≥10²·⁷ EID50", via_label:"Intraocular / Agua de bebida", edad_min:"4 semanas", programa:"Dosis única desde las 4 semanas. Pollas de reemplazo.", resguardo:"21 días", almacenamiento:"2-7°C. No congelar. Usar de inmediato una vez reconstituida.", proveedor:"Boehringer Ingelheim Chile", reg_sag:"1177-B", postura:null, notas:"Vacuna convencional (no vectorizada). Puede dar estertores leves y, por vía ocular, conjuntivitis o lagrimeo entre los días 4 y 8. Evitar estrés." },
+  { id:"bursa_blen_m",        nombre:"Bursa Blen M", tipo:"Viva", protege:["gumboro"], cepa:"Cepa G-87 ≥10²·⁰ TCID50", via_label:"Agua de bebida", edad_min:"9 días", programa:"Dosis única desde los 9 días.", resguardo:"21 días", almacenamiento:"2-7°C. No congelar.", proveedor:"Boehringer Ingelheim Chile", reg_sag:"1179-B", postura:null, notas:"La FT SAG la registra solo para pollos broiler." },
+  { id:"vaxxitek_hvt_ibd",    nombre:"Vaxxitek HVT+IBD", tipo:"Vectorizada", protege:["marek","gumboro"], cepa:"HVT FC-126 recombinante rHVT/IBD (VP2) ≥3.880 UFP", via_label:"SC cuello (0.2 mL) / In ovo (0.05 mL)", edad_min:"Día 1 / In ovo 18-19 d", programa:"Dosis única. Inmunidad: Marek a los 4 días, Gumboro a las 2 semanas. Gumboro dura 9 semanas según la FT SAG.", resguardo:"21 días", almacenamiento:"Nitrógeno líquido (-196°C). Usar en 1 h tras diluir.", proveedor:"Boehringer Ingelheim Chile", reg_sag:"2757-B", postura:null, notas:"Vector HVT: no combinar con otra vectorizada HVT. Solo se mezcla con su diluyente (o el colorante azul del rótulo)." },
+  { id:"prevexxion_rn",       nombre:"Prevexxion RN", tipo:"Viva (congelada)", protege:["marek"], cepa:"HVC recombinante serotipo 1, cepa RN1250 ≥952 UFP", via_label:"SC (0.2 mL) / In ovo (0.05 mL)", edad_min:"Día 1 / In ovo 18-19 d", programa:"Dosis única. Inmunidad a los 5 días; dura todo el período de riesgo. Para cepas muy virulentas de Marek.", resguardo:"21 días", almacenamiento:"Nitrógeno líquido (-196°C). Diluyente bajo 30°C.", proveedor:"Boehringer Ingelheim Chile", reg_sag:"2767-B", postura:null, notas:"Contiene secuencias LTR retrovirales: puede interferir con el PCR-LTR de reticuloendoteliosis." },
+  { id:"bi_marek_hvt",        nombre:"Marek HVT congelada (Boehringer)", tipo:"Viva (congelada)", protege:["marek"], cepa:"HVT FC-126 serotipo 3 ≥1.466 UFP", via_label:"SC cuello (0.2 mL) / In ovo (0.05 mL)", edad_min:"Día 1 / In ovo 18-19 d", programa:"Dosis única.", resguardo:"21 días", almacenamiento:"Nitrógeno líquido (-196°C). Diluyente 15-30°C. Usar en 1 h.", proveedor:"Boehringer Ingelheim Chile", reg_sag:"1172-B", postura:null, notas:"Sin nombre comercial en el SAG. No mezclar con nada salvo su diluyente." },
+  { id:"bi_marek_hvt_sb1",    nombre:"Marek HVT + SB1 congelada (Boehringer)", tipo:"Viva (congelada)", protege:["marek"], cepa:"HVT FC-126 (serotipo 3) ≥1.466 UFP + SB1 (serotipo 2) ≥1.428 UFP", via_label:"SC cuello (0.2 mL) / In ovo (0.05 mL)", edad_min:"Día 1 / In ovo 18-19 d", programa:"Dosis única.", resguardo:"21 días", almacenamiento:"Nitrógeno líquido (-196°C). Diluyente 15-30°C. Usar en 1 h.", proveedor:"Boehringer Ingelheim Chile", reg_sag:"1175-B", postura:null, notas:"Sin nombre comercial en el SAG. Bivalente serotipos 2 + 3. No mezclar con nada salvo su diluyente." },
+  { id:"angavac",             nombre:"Angavac", tipo:"Inactivada", protege:["hci"], cepa:"Adenovirus aviar tipo 4, cepa PAK ≥10⁷·⁰ CCID50", via_label:"SC / IM (0.1 mL; reproductoras 0.3 mL)", edad_min:"Día 1", programa:"Pollos, pollas y reproductoras: 0.1 mL entre el día 1 y la 1ª semana. Reproductoras: 0.3 mL 2-4 semanas antes de la postura.", resguardo:"Cero días", almacenamiento:"2-8°C. No congelar.", proveedor:"Boehringer Ingelheim Chile", reg_sag:"1927-B", postura:false, notas:"Emulsión oleosa: reacciones locales transitorias ocasionales." },
+  // ── Ceva y MSD agregadas 2026-10 desde FT SAG ──
+  { id:"cevac_md_hvt",        nombre:"CEVAC MD HVT", tipo:"Viva (congelada)", protege:["marek"], cepa:"HVT FC-126 serotipo 3 ≥2.088 UFP", via_label:"SC cuello / In ovo", edad_min:"Día 1 / In ovo 18-19 d", programa:"Dosis única.", resguardo:"21 días", almacenamiento:"Nitrógeno líquido (-196°C). Diluyente 15-30°C.", proveedor:"Ceva Salud Animal Chile", reg_sag:"2446-B", postura:false, notas:"HVT convencional (no vectorizada)." },
+  { id:"cevac_vitapest_l",    nombre:"Cevac Vitapest L", tipo:"Viva", protege:["newcastle"], cepa:"Cepa PHY.LMV.42 ≥10⁵·⁵ EID50", via_label:"Intraocular / Spray", edad_min:"Día 1", programa:"1ª al día 1; booster 3-4 semanas después; pollas: revacunar a las 10-12 semanas. Inmunidad a los 7-10 días; dura 4-6 semanas.", resguardo:"Cero días", almacenamiento:"2-8°C. No congelar. Diluyente 5-25°C.", proveedor:"Ceva Salud Animal Chile", reg_sag:"2770-B", postura:false, notas:"Cepa lentogénica PHY.LMV.42." },
+  { id:"cevac_vitabron_l",    nombre:"Cevac Vitabron L", tipo:"Viva", protege:["bronquitis","newcastle"], cepa:"ND PHY.LMV.42 ≥10⁵·⁵ + BI Mass H120 ≥10³·³ EID50", via_label:"Intraocular / Spray", edad_min:"Día 1 o 3-5 semanas", programa:"Pollas: 2 dosis con 30-35 días de intervalo.", resguardo:"Cero días", almacenamiento:"2-8°C. Protegido de la luz.", proveedor:"Ceva Salud Animal Chile", reg_sag:"2686-B", postura:false, notas:"Rara vez signos respiratorios leves 3-6 días post vacunación." },
+  { id:"cevac_bron_120_l",    nombre:"CEVAC Bron 120 L", tipo:"Viva", protege:["bronquitis"], cepa:"Mass H120 ≥10³·³ EID50", via_label:"Intraocular / Spray / Agua", edad_min:"Días 1-4", programa:"1ª a los 1-4 días (ocular o spray); refuerzo 3-4 semanas después (spray o agua); pollas: 2º refuerzo a las 10-12 semanas.", resguardo:"Cero días", almacenamiento:"2-8°C. No congelar. Diluyente 5-25°C.", proveedor:"Ceva Salud Animal Chile", reg_sag:"1662-B", postura:false, notas:"Cepa Mass H120." },
+  { id:"innofusion_ilt_ibd",  nombre:"Innofusion ILT-IBD", tipo:"Vectorizada", protege:["marek","laringotraqueitis","gumboro"], cepa:"HVT FC-126 recombinante rHVT/IBD/ILT 10³·²–10⁴·⁶ UFP", via_label:"SC cuello (0.2 mL) / In ovo (0.05 mL)", edad_min:"Día 1 / In ovo 18-19 d", programa:"Dosis única. Inmunidad de Laringotraqueitis y Gumboro: 100 semanas.", resguardo:"Cero días", almacenamiento:"Nitrógeno líquido (-196°C). Diluyente bajo 30°C.", proveedor:"MSD / Intervet Chile", reg_sag:"2758-B", postura:false, notas:"FT: se puede mezclar con Nobilis Rismavac (SC) y dar el día 1, sin mezclar, con Nobilis ND Clone 30, ND C2, IB Ma5 o IB 4-91." },
+  { id:"innofusion_nd_ilt",   nombre:"Innofusion ND-ILT", tipo:"Vectorizada", protege:["marek","newcastle","laringotraqueitis"], cepa:"HVT FC-126 recombinante rHVT/NDV/ILT ≥2.925 UFP", via_label:"SC cuello (0.2 mL) / In ovo (0.05 mL)", edad_min:"Día 1 / In ovo 18-19 d", programa:"Dosis única. Newcastle y Laringotraqueitis desde las 4 semanas; duran 62 semanas.", resguardo:"Cero días", almacenamiento:"Nitrógeno líquido (-196°C). Diluyente bajo 30°C.", proveedor:"MSD / Intervet Chile", reg_sag:"2768-B", postura:false, notas:"FT: se puede mezclar con Nobilis Rismavac (SC) y dar, sin mezclar, con Nobilis ND Clone 30, ND C2, IB Ma5 o IB 4-91 (con Clone 30 o C2, Newcastle desde las 2 semanas)." },
+  { id:"nobilis_salenvac_etc", nombre:"Nobilis Salenvac ETC", tipo:"Inactivada", protege:["salmonella"], cepa:"S. Enteritidis 109 PT4 + S. Typhimurium DT104 + S. Infantis S03499-06", via_label:"Intramuscular (0.5 mL)", edad_min:"6 semanas", programa:"1ª desde las 6 semanas; 2ª al menos 4 semanas después y como mínimo 3 semanas antes de la postura.", resguardo:"Cero días", almacenamiento:"2-8°C. No congelar. Proteger de la luz.", proveedor:"MSD / Intervet Chile", reg_sag:"2558-B", postura:false, notas:"Reduce colonización y excreción fecal de S. Enteritidis, Typhimurium, Heidelberg, Infantis, Hadar y Virchow." },
 ];
 
 // Programa de referencia (base Nutringen/AGRICOVIAL para pollas de reemplazo, postura).
@@ -721,6 +761,52 @@ const VIA_LABELS = {
 
 // ─── RANGOS DE DÍAS POR VACUNA (según fichas técnicas) ───────────────────────
 const RANGOS = {
+  // Boehringer
+  bi_nd_lasota:      [ { label:"Dosis única", min:1, max:98, default:14, nota:"Ocular desde el día 1; spray y agua desde el día 14." } ],
+  bi_nd_b1:          [ { label:"Dosis única", min:1, max:98, default:1,  nota:"Ocular o spray gota gruesa desde el día 1; agua desde el día 14." } ],
+  bi_nd_b1_ib_mass:  [ { label:"Dosis única", min:7, max:98, default:14, nota:"Spray desde los 7 días; agua desde los 14." } ],
+  bi_ib_mass:        [ { label:"Dosis única", min:1, max:98, default:7,  nota:"Ocular desde el día 1; spray y agua desde los 7 días." } ],
+  bi_ib_h120: [
+    { label:"1ª dosis",     min:1,  max:7,  default:1,  nota:"Desde el día 1, agua o nebulización." },
+    { label:"Refuerzo",     min:28, max:35, default:29, nota:"4 semanas después de la primovacunación." },
+    { label:"2º refuerzo",  min:56, max:84, default:63, nota:"Desde las 8 semanas de edad." }
+  ],
+  gallivac_ib88_neo: [
+    { label:"1ª dosis",     min:10, max:15, default:14, nota:"Pollas: entre los 10 y 15 días." },
+    { label:"Revacunación", min:56, max:84, default:63, nota:"Pollas: 8-12 semanas para mantener la inmunidad." }
+  ],
+  lt_blen:           [ { label:"Dosis única", min:28, max:98, default:49, nota:"Desde las 4 semanas. Ocular o agua." } ],
+  bursa_blen_m:      [ { label:"Dosis única", min:9,  max:28, default:14, nota:"Desde los 9 días, en agua." } ],
+  vaxxitek_hvt_ibd:  [ { label:"Dosis única", min:1,  max:1,  default:1,  nota:"SC día 1 (0.2 mL) o in ovo 18-19 días (0.05 mL)." } ],
+  prevexxion_rn:     [ { label:"Dosis única", min:1,  max:1,  default:1,  nota:"SC día 1 (0.2 mL) o in ovo 18-19 días (0.05 mL)." } ],
+  bi_marek_hvt:      [ { label:"Dosis única", min:1,  max:1,  default:1,  nota:"SC día 1 (0.2 mL) o in ovo 18-19 días (0.05 mL)." } ],
+  bi_marek_hvt_sb1:  [ { label:"Dosis única", min:1,  max:1,  default:1,  nota:"SC día 1 (0.2 mL) o in ovo 18-19 días (0.05 mL)." } ],
+  angavac: [
+    { label:"Dosis 1ª semana (0.1 mL)",       min:1,   max:7,   default:1,   nota:"Entre el día 1 y la 1ª semana." },
+    { label:"Reproductoras pre-postura (0.3 mL)", min:98, max:140, default:119, nota:"2-4 semanas antes del inicio de postura." }
+  ],
+  // Ceva y MSD (2026-10)
+  cevac_md_hvt:      [ { label:"Dosis única", min:1, max:1, default:1, nota:"SC día 1 o in ovo 18-19 días." } ],
+  cevac_vitapest_l: [
+    { label:"1ª dosis",              min:1,  max:7,  default:1,  nota:"Día 1, ocular o spray." },
+    { label:"Refuerzo",              min:22, max:35, default:28, nota:"3-4 semanas después de la 1ª." },
+    { label:"Revacunación (pollas)", min:70, max:84, default:70, nota:"10-12 semanas de edad." }
+  ],
+  cevac_vitabron_l: [
+    { label:"1ª dosis", min:1,  max:35, default:1,  nota:"Día 1 o entre las 3 y 5 semanas." },
+    { label:"2ª dosis", min:31, max:70, default:35, nota:"30-35 días después de la 1ª." }
+  ],
+  cevac_bron_120_l: [
+    { label:"1ª dosis",             min:1,  max:4,  default:1,  nota:"Días 1-4, ocular o spray." },
+    { label:"Refuerzo",             min:22, max:32, default:22, nota:"3-4 semanas después, spray o agua." },
+    { label:"2º refuerzo (pollas)", min:70, max:84, default:70, nota:"10-12 semanas de edad." }
+  ],
+  innofusion_ilt_ibd: [ { label:"Dosis única", min:1, max:1, default:1, nota:"SC día 1 (0.2 mL) o in ovo 18-19 días (0.05 mL)." } ],
+  innofusion_nd_ilt:  [ { label:"Dosis única", min:1, max:1, default:1, nota:"SC día 1 (0.2 mL) o in ovo 18-19 días (0.05 mL)." } ],
+  nobilis_salenvac_etc: [
+    { label:"1ª dosis", min:42, max:98,  default:56, nota:"Desde las 6 semanas." },
+    { label:"2ª dosis", min:70, max:119, default:98, nota:"≥4 semanas después de la 1ª y ≥3 semanas antes de la postura." }
+  ],
   primun_salmonella_e: [
     { label:"1ª dosis",    min:1,   max:21,  default:1,   nota:"" },
     { label:"2ª dosis",    min:22,  max:70,  default:42,  nota:"Mínimo 3 semanas post 1ª dosis" },
@@ -747,7 +833,7 @@ const RANGOS = {
   ],
   nobilis_ib_4_91: [
     { label:"1ª dosis",    min:1,   max:21,  default:1,   nota:"Spray/ocular desde día 1; agua desde día 7." },
-    { label:"Revacunación", min:21,  max:84,  default:35,  nota:"Según programa y presión de campo. Alternar con cepa Mass." }
+    { label:"Revacunación", min:21,  max:126, default:42,  nota:"FT: en pollas revacunar cada 6 semanas. Segura en postura." }
   ],
   nobilis_ib_ma5: [
     { label:"1ª dosis",    min:1,   max:14,  default:1,   nota:"" },
@@ -925,6 +1011,7 @@ function buildEnfSelectorHTML(enf) {
         : "";
       html += `<div class="vac-radio-card" id="card-${enf.id}-${v.id}" data-enf="${enf.id}" data-vac="${v.id}">
         <div class="vac-card-info">
+          <span class="vac-card-lab lab-${labDe(v).toLowerCase()}">${labDe(v)}</span>
           <div class="vac-card-nombre">${v.nombre}</div>
           <div class="vac-card-cepa">${v.cepa || ""}</div>
           <div class="vac-card-via">${v.via_label}</div>
@@ -935,9 +1022,45 @@ function buildEnfSelectorHTML(enf) {
     });
     html += `</div></div>`;
   });
-  html += `</div><div id="dias-container-${enf.id}" class="dias-container"></div>`;
+  html += `<div class="lab-vacio" style="display:none;"></div></div><div id="dias-container-${enf.id}" class="dias-container"></div>`;
   return html;
 }
+
+// Filtro por laboratorio: por defecto se arma el programa con un solo laboratorio,
+// porque las compatibilidades de uso conjunto solo las declara cada laboratorio para sus productos.
+const LABS_FILTRO = ["Ceva", "MSD", "Boehringer"];
+let labFiltro = "todos";
+function labGrupo(v) { const l = labDe(v); return LABS_FILTRO.includes(l) ? l : "Otros"; }
+function renderFiltroLab() {
+  const cont = document.getElementById("lab-filtro");
+  if (!cont) return;
+  const opciones = [["todos", "Todos"], ...LABS_FILTRO.map(l => [l, l]), ["Otros", "Otros"]];
+  cont.innerHTML = "<span>Laboratorio:</span>" + opciones.map(([k, l]) =>
+    `<button class="${labFiltro === k ? "on" : ""}" onclick="filtrarLab('${k}')">${l}</button>`).join("");
+}
+function filtrarLab(lab) {
+  labFiltro = lab;
+  renderFiltroLab();
+  aplicarFiltroLab();
+}
+function aplicarFiltroLab() {
+  document.querySelectorAll(".vac-selector-enf").forEach(sec => {
+    sec.querySelectorAll(".vac-radio-card").forEach(card => {
+      const v = CATALOGO.find(x => x.id === card.dataset.vac);
+      const oculta = labFiltro !== "todos" && labGrupo(v) !== labFiltro && !card.classList.contains("selected");
+      card.classList.toggle("lab-oculta", oculta);
+    });
+    sec.querySelectorAll(".tipo-group").forEach(g =>
+      g.classList.toggle("lab-oculta", !g.querySelector(".vac-radio-card:not(.lab-oculta)")));
+    const vacio = sec.querySelector(".lab-vacio");
+    if (vacio) {
+      const sinVisibles = !sec.querySelector(".vac-radio-card:not(.lab-oculta)");
+      vacio.style.display = sinVisibles ? "block" : "none";
+      vacio.textContent = sinVisibles ? `Sin vacunas de ${labFiltro} con ficha para esta enfermedad. Elige "Todos" para ver otros laboratorios.` : "";
+    }
+  });
+}
+renderFiltroLab();
 
 function actualizarSelectores() {
   const sel = new Set([...document.querySelectorAll(".enf-card.on input")].map(cb => cb.value));
@@ -969,6 +1092,7 @@ function actualizarSelectores() {
     if (sibling !== section) container.insertBefore(section, sibling || null);
   });
 
+  aplicarFiltroLab();
   actualizarBotonGenerar();
 }
 
@@ -1004,6 +1128,12 @@ const WARNS_VAC = {
 };
 
 const NOTA_CEPA = {
+  gallivac_ib88_neo:   "Cepa CR88121, grupo CR88 (= 793/B, GI-13). La FT exige diagnóstico previo de cepa CR88 en la zona y aclara que no reemplaza a la vacuna Mass. En Chile el genotipo prevalente es GI-16/Q1 (ver anexo).",
+  bi_ib_h120:          "Cepa Massachusetts H120: protección de serotipo Mass. No protege frente a GI-16/Q1, el genotipo de campo prevalente en Chile. Ver anexo antigénico.",
+  cevac_bron_120_l:    "Cepa Massachusetts H120: protección de serotipo Mass. No protege frente a GI-16/Q1, el genotipo de campo prevalente en Chile. Ver anexo antigénico.",
+  cevac_vitabron_l:    "Combina Newcastle PHY.LMV.42 + Bronquitis Mass H120. Como toda vacuna Mass, la protección de bronquitis es de serotipo.",
+  bi_ib_mass:          "Serotipo Massachusetts; la FT SAG no indica la cepa. Protección limitada a Mass.",
+  bi_nd_b1_ib_mass:    "Combina Newcastle B1 (cepa suave) + Bronquitis tipo Mass. La protección de bronquitis queda limitada al serotipo Mass.",
   bronipra_1:          "Cepa Massachusetts (H120): protege bien frente al serotipo Mass, pero da protección cruzada limitada frente a variantes de campo (QX, 793B/4-91). Si hay presión de esas cepas en la zona, complementar con una vacuna variante (ej. Cevac Ibird).",
   nobilis_ib_4_91:     "Cepa 4/91 (grupo 793B/GI-13). En Chile protegió frente a aislados GI-13 pero no frente a GI-16/Q1 (Guzmán 2019): amplía cobertura sobre Mass, no la reemplaza. Se usa junto a una cepa Mass. Ver anexo antigénico.",
   nobilis_ib_ma5:      "Cepa Massachusetts (Ma5): protección de serotipo. Verifique qué variantes circulan en la zona — puede requerir complemento con una vacuna variante (protectotipo 793B/4-91 o QX).",
@@ -1098,12 +1228,12 @@ const ANEXO = {
   bronquitisClave: "Bronquitis: existen muchos serotipos/genotipos y la protección es específica de cada uno (depende de la proteína S1). Vacunar con una cepa no asegura protección contra otra. En Chile el genotipo de campo prevalente desde 2008 es GI-16 (Q1); ninguna vacuna del catálogo es de ese genotipo.",
   bronquitis: [
     { grupo: "Massachusetts (GI-1)",
-      cepas: "H120 (Bronipra 1) · Ma5 (Nobilis IB Ma5, Ma5+Clone 30) · B48 (Cevac Mass L, Cevac BI L) · M41 inactivada (Nobilis IB+ND+EDS, IB Multi+ND+EDS, RT+IB Multi+ND+EDS, Cevac ND IB EDS K, Corymune 7K)",
+      cepas: "H120 (Bronipra 1, Cevac Bron 120 L, Cevac Vitabron L, Bronquitis H120 Boehringer) · Ma5 (Nobilis IB Ma5, Ma5+Clone 30) · B48 (Cevac Mass L, Cevac BI L) · Mass sin cepa declarada en la FT (Bronquitis Mass y ND B1 + BI Mass, Boehringer) · M41 inactivada (Nobilis IB+ND+EDS, IB Multi+ND+EDS, RT+IB Multi+ND+EDS, Cevac ND IB EDS K, Corymune 7K)",
       cubre: "Serotipo Mass. Respuesta predominantemente celular (Alrasheed 2021).",
       chile: "No protege frente a GI-16/Q1: identidad S1 bajo el umbral de protección cruzada (wiki, Guzmán 2025)." },
     { grupo: "793/B (GI-13)",
-      cepas: "1/96 (Cevac Ibird)",
-      cubre: "Grupo 793/B (FT). Mezclada con Mass L en spray: 793/B + Mass (FT). Respuesta predominantemente humoral (Alrasheed 2021, cepa 4/91).",
+      cepas: "1/96 (Cevac Ibird) · 4-91 (Nobilis IB 4-91) · CR88121 (Gallivac IB88 Neo)",
+      cubre: "Grupo 793/B (FT). Ibird mezclada con Mass L en spray: 793/B + Mass (FT). Nobilis IB 4-91 mezclada con IB Ma5: 793/B + Mass (FT). Respuesta predominantemente humoral (Alrasheed 2021, cepa 4/91).",
       chile: "La 4/91, del mismo grupo, protegió frente a aislados chilenos GI-13 (relación antigénica 73 %) pero no frente a GI-16 (33-34 %, con signos clínicos) (Guzmán 2019). En Chile se detectaron recombinantes campo × 4/91 en 2015 y 2021 (Guzmán 2025)." },
     { grupo: "D207/D274 (cepa 249g)",
       cepas: "Solo en inactivadas: Nobilis IB Multi+ND+EDS (2717-B) y Nobilis RT+IB Multi+ND+EDS (2719-B)",
@@ -1113,11 +1243,11 @@ const ANEXO = {
   newcastleClave: "Newcastle: hay un solo serotipo (APMV-1), así que todas las cepas vacunales protegen contra el mismo virus. Se diferencian en la reactividad (ICPI: cuánto 'enferman' al ave) y en la magnitud de la respuesta, no en la cobertura antigénica. Límite: cepas de campo del genotipo VII pueden escapar parcialmente a las vacunas clásicas.",
   newcastle: [
     { grupo: "Hitchner B1",
-      cepas: "Cevac BI L (combinada con BI B48)",
+      cepas: "Cevac BI L (combinada con BI B48) · Newcastle B1 y ND B1 + BI Mass (Boehringer)",
       cubre: "ICPI 0,2: la más suave de las cepas lentogénicas de uso común (Swayne 2020).",
       chile: "Apta para primovacunación al día 1." },
     { grupo: "La Sota",
-      cepas: "Viva: Hipraviar S, Newcastle Zoetis (sin registro SAG) · Inactivada: Cevac Broiler ND K, Cevac ND IB EDS K, Corymune 7K",
+      cepas: "Viva: Hipraviar S, Newcastle La Sota (Boehringer), Newcastle Zoetis (sin registro SAG) · Inactivada: Cevac Broiler ND K, Cevac ND IB EDS K, Corymune 7K",
       cubre: "ICPI 0,4: más reactiva que B1. FT Hipraviar S: síntomas respiratorios leves a los 5-7 días. Por eso se aplica en spray o agua, a dosis uniforme (Ravikumar 2022).",
       chile: "FT Hipraviar S: no mezclar ni coadministrar con otros productos." },
     { grupo: "Clone 30",
@@ -1128,8 +1258,12 @@ const ANEXO = {
       cepas: "Nobilis ND C2",
       cubre: "FT: sin reacciones adversas descritas; recomienda revacunar 2-3 semanas después con otra viva lentogénica. ICPI: sin dato en la wiki.",
       chile: "—" },
+    { grupo: "PHY.LMV.42",
+      cepas: "Cevac Vitapest L · Cevac Vitabron L (combinada con BI H120)",
+      cubre: "FT Vitapest L: inmunidad a los 7-10 días, dura 4-6 semanas. FT Vitabron L: rara vez signos respiratorios leves 3-6 días post vacunación. ICPI: sin dato en la wiki.",
+      chile: "—" },
     { grupo: "Vectorizada HVT (herpesvirus de pavo)",
-      cepas: "Vectormune HVT NDV (+ Marek) · Innofusion ND-IBD (+ Marek + Gumboro)",
+      cepas: "Vectormune HVT NDV (+ Marek) · Innofusion ND-IBD (+ Marek + Gumboro) · Innofusion ND-ILT (+ Marek + Laringotraqueitis)",
       cubre: "No contiene virus Newcastle: el HVT expresa proteína(s) del NDV (Innofusion: proteína F). Inmunidad Newcastle desde los 28 días (Vectormune) y hasta 60 semanas (Innofusion). No se disemina entre aves.",
       chile: "No combinar dos vacunas vectorizadas HVT (ej. Vectormune HVT LT + HVT NDV): se ha documentado interferencia entre vectores HVT (Ravikumar 2022)." }
   ],
@@ -1168,20 +1302,27 @@ function calendarioIncluyeNdBi(cal) {
 // Cruza las aplicaciones entre sí y contra las fichas técnicas. Cada alerta declara su fuente:
 // "FT" (ficha técnica del catálogo) o "Criterio técnico" (práctica general, no escrita en la FT).
 const RESP_ENF = ["bronquitis", "newcastle", "laringotraqueitis"];
-const HVT_VECTOR = ["vectormune_hvt_ndv", "vectormune_hvt_lt", "innovax_ilt", "innofusion_nd_ibd"];
+const HVT_VECTOR = ["vectormune_hvt_ndv", "vectormune_hvt_lt", "innovax_ilt", "innofusion_nd_ibd", "innofusion_ilt_ibd", "innofusion_nd_ilt", "vaxxitek_hvt_ibd"];
 const COMPATIBLES = [
   ["nobilis_ib_ma5", "nobilis_nd_clone30", "La ficha Nobilis las declara compatibles"],
   ["nobilis_ib_ma5", "nobilis_gumboro_d78", "La ficha Nobilis las declara compatibles"],
   ["nobilis_nd_clone30", "nobilis_gumboro_d78", "La ficha Nobilis las declara compatibles"],
   ["nobilis_ib_ma5", "nobilis_ib_4_91", "MSD las propone juntas (protectotipo Mass + 4/91)"],
-  ["cevac_mass_l", "cevac_ibird", "La ficha de Ibird permite mezclarla con Cevac Mass L en spray (cobertura 793/B + Mass)"]
+  ["cevac_mass_l", "cevac_ibird", "La ficha de Ibird permite mezclarla con Cevac Mass L en spray (cobertura 793/B + Mass)"],
+  ["innovax_ilt", "nobilis_rismavac", "Intervet recomienda usar Innovax ILT con Nobilis Rismavac"],
+  // Innofusion (FT SAG 2730-B, 2758-B, 2768-B): mezclable con Rismavac; el día 1, sin mezclar, con Clone 30, C2, Ma5 o 4-91
+  ...["innofusion_nd_ibd", "innofusion_ilt_ibd", "innofusion_nd_ilt"].flatMap(inno => [
+    [inno, "nobilis_rismavac", "La ficha de Innofusion permite mezclarla con Nobilis Rismavac (SC)"],
+    ...["nobilis_nd_clone30", "nobilis_nd_c2", "nobilis_ib_ma5", "nobilis_ib_4_91"].map(v =>
+      [inno, v, "La ficha de Innofusion permite darlas el mismo día, sin mezclar"])
+  ])
 ];
 // Días mínimos entre la aplicación y el inicio de postura, según cada FT
 const PRE_POSTURA = {
   nobilis_ae_pox: 28, vectormune_fp_lt_ae: 28, vectormune_fp_lt: 28, novamune: 28,
   nobilis_rt_ib_multi_nd_eds: 28, nobilis_ib_multi_nd_eds: 28, nobilis_ib_nd_eds: 28,
-  cevac_corymune_4k: 28, nobilis_coryza: 28,
-  avipro_salmonella_vac_e: 21, avipro_salmonella_duo: 21, cevac_nd_ib_eds_k: 21,
+  cevac_corymune_4k: 28, nobilis_coryza: 28, angavac: 14,
+  avipro_salmonella_vac_e: 21, avipro_salmonella_duo: 21, cevac_nd_ib_eds_k: 21, nobilis_salenvac_etc: 21,
   cevac_corymune_7k: 14
 };
 const NIVEL_ORDEN = { conflicto: 0, aviso: 1, nota: 2 };
@@ -1192,7 +1333,7 @@ function inicioPosturaDia() {
 }
 function labDe(v) {
   const p = v.proveedor || "";
-  const labs = [[/MSD|Intervet/, "MSD"], [/Ceva/, "Ceva"], [/HIPRA|Veterquímica/, "HIPRA"], [/Elanco/, "Elanco"], [/Zoetis/, "Zoetis"], [/Calier|Agrovet/, "Calier"]];
+  const labs = [[/MSD|Intervet/, "MSD"], [/Ceva/, "Ceva"], [/HIPRA|Veterquímica/, "HIPRA"], [/Elanco/, "Elanco"], [/Zoetis/, "Zoetis"], [/Calier|Agrovet/, "Calier"], [/Boehringer/, "Boehringer"]];
   const m = labs.find(([re]) => re.test(p));
   return m ? m[1] : p.split("/")[0].trim();
 }
@@ -1268,6 +1409,20 @@ function revisarCalendario(cal, inicioPostura) {
       add("aviso", [s, ...cerca], `Avipro Salmonella Vac E (día ${s.r.dia}) con otros productos a ≤14 días`,
         `La ficha SAG cargada dice «no administrar otros productos 14 días antes ni después». La ficha europea (VMD) lo limita a antibacterianos 3 días antes y después, permite el mismo día que Marek inyectable (HVT/Rispens) y prohíbe mezclarla con otras vacunas. Cercanas: ${listaFilas(cerca)}.`, "FT");
   });
+
+  // Cláusula estándar de las FT SAG: «no administrar otros productos 14 días previos y posteriores».
+  // Casi todas las fichas SAG la traen (Ceva, MSD, Boehringer) por falta de estudios de uso conjunto:
+  // se informa una sola vez como nota, sin contar los pares que la ficha declara compatibles.
+  const pares14 = [];
+  for (let i = 0; i < filas.length; i++) for (let j = i + 1; j < filas.length; j++) {
+    const a = filas[i], b = filas[j];
+    if (a.v.id === b.v.id || Math.abs(a.r.dia - b.r.dia) > 14 || compatibleDecl(a.v.id, b.v.id)) continue;
+    if (a.v.id === "avipro_salmonella_vac_e" || b.v.id === "avipro_salmonella_vac_e") continue;
+    pares14.push([a, b]);
+  }
+  if (pares14.length)
+    add("nota", pares14.flat(), "Vacunas a 14 días o menos entre sí (cláusula estándar de las FT SAG)",
+      `${pares14.length} par${pares14.length > 1 ? "es" : ""} de vacunas quedan a 14 días o menos. Casi todas las fichas SAG (Ceva, MSD, Boehringer) dicen «no se recomienda administrar otros productos 14 días previos y posteriores», porque no hay estudios de uso conjunto: no es una incompatibilidad demostrada. No se cuentan las combinaciones que la ficha declara compatibles; por eso conviene armar el programa con un solo laboratorio.`, "FT");
 
   // Cruces el mismo día
   const porDia = {};
@@ -1518,6 +1673,72 @@ function cargarProgramaNutringen() {
     return e;
   }).filter(Boolean).sort((a, b) => a.dia - b.dia);
   renderTabla(calendarioActual, !!calFechaStr, calLote, calFechaStr, true);
+}
+
+// Planes de un solo laboratorio para pollas de reemplazo (postura en la semana 20).
+// Solo usan vacunas de ese laboratorio, con días dentro de los rangos de sus FT y las combinaciones
+// que esas FT declaran (COMPATIBLES). Revisados con revisarCalendario(): sin conflictos ni avisos.
+const PLANES_LAB = {
+  ceva: {
+    lote: "Plan Ceva",
+    desc: "Solo Ceva. Salmonella cubierta con S. Enteritidis inactivada (Corymune 4K y 7K): Ceva no tiene Salmonella viva en Chile.",
+    filas: [
+      { dia:1,   id:"vectormune_hvt_ndv",   dosis:"Dosis única",           via:"subcutanea",    lugar:"Planta incubación" },
+      { dia:1,   id:"novamune",             dosis:"Dosis única",           via:"subcutanea",    lugar:"Planta incubación" },
+      { dia:1,   id:"cevac_mass_l",         dosis:"1ª dosis",              via:"spray",         nota:"Mezclada con Ibird en spray (FT Ibird)" },
+      { dia:1,   id:"cevac_ibird",          dosis:"1ª dosis",              via:"spray",         nota:"Mezclada con Mass L en spray (FT Ibird)" },
+      { dia:3,   id:"immucox_5",            dosis:"Dosis única",           via:"agua_bebida" },
+      { dia:21,  id:"cevac_bi_l",           dosis:"1ª dosis",              via:"spray" },
+      { dia:45,  id:"cevac_bi_l",           dosis:"Refuerzo",              via:"agua_bebida" },
+      { dia:63,  id:"vectormune_fp_lt_ae",  dosis:"Dosis única",           via:"puncion_alar" },
+      { dia:63,  id:"cevac_corymune_4k",    dosis:"1ª dosis",              via:"intramuscular", nota:"Prima Coriza y S. Enteritidis; el refuerzo es Corymune 7K" },
+      { dia:63,  id:"cevac_ibird",          dosis:"Revacunación (pollas)", via:"spray_agua" },
+      { dia:77,  id:"cevac_bi_l",           dosis:"2º refuerzo (pollas)",  via:"spray_agua" },
+      { dia:91,  id:"cevac_ibird",          dosis:"Revacunación (pollas)", via:"spray_agua" },
+      { dia:105, id:"cevac_corymune_7k",    dosis:"Dosis única",           via:"intramuscular", nota:"Pechuga. 4 semanas después de la última viva de ND/BI (día 77)" }
+    ]
+  },
+  msd: {
+    lote: "Plan MSD",
+    desc: "Solo MSD. Marek, Laringotraqueitis y Gumboro con Innofusion ILT-IBD + Rismavac en planta. MSD no tiene vacuna de coccidiosis con ficha cargada.",
+    filas: [
+      { dia:1,   id:"innofusion_ilt_ibd",    dosis:"Dosis única",  via:"subcutanea",    lugar:"Planta incubación", nota:"Mezclada con Rismavac en el mismo diluyente (FT)" },
+      { dia:1,   id:"nobilis_rismavac",      dosis:"Dosis única",  via:"subcutanea",    lugar:"Planta incubación" },
+      { dia:1,   id:"nobilis_ib_ma5",        dosis:"1ª dosis",     via:"spray",         nota:"Mezclada con IB 4-91 en spray (FT 4-91)" },
+      { dia:1,   id:"nobilis_ib_4_91",       dosis:"1ª dosis",     via:"spray",         nota:"Mezclada con IB Ma5 en spray (FT 4-91)" },
+      { dia:21,  id:"nobilis_nd_clone30",    dosis:"1ª dosis",     via:"spray" },
+      { dia:42,  id:"nobilis_ib_ma5",        dosis:"Revacunación", via:"spray_agua",    nota:"Junto con ND Clone 30 (compatibles por FT)" },
+      { dia:42,  id:"nobilis_nd_clone30",    dosis:"Revacunación", via:"spray_agua" },
+      { dia:56,  id:"nobilis_salenvac_etc",  dosis:"1ª dosis",     via:"intramuscular" },
+      { dia:63,  id:"nobilis_ib_4_91",       dosis:"Revacunación", via:"spray_agua",    nota:"FT: en pollas, cada 6 semanas" },
+      { dia:70,  id:"nobilis_ae_pox",        dosis:"Dosis única",  via:"puncion_alar" },
+      { dia:70,  id:"nobilis_coryza",        dosis:"1ª dosis",     via:"subcutanea" },
+      { dia:98,  id:"nobilis_salenvac_etc",  dosis:"2ª dosis",     via:"intramuscular" },
+      { dia:105, id:"nobilis_coryza",        dosis:"2ª dosis",     via:"subcutanea" },
+      { dia:105, id:"nobilis_ib_4_91",       dosis:"Revacunación", via:"spray_agua",    nota:"Segura en postura (FT): se puede seguir cada 6 semanas" },
+      { dia:112, id:"nobilis_ib_multi_nd_eds", dosis:"Dosis única", via:"intramuscular", nota:"4 semanas antes de la postura" }
+    ]
+  }
+};
+
+function cargarPlanLab(key) {
+  const plan = PLANES_LAB[key];
+  calFechaStr = document.getElementById("fecha_inicio").value;
+  calLote = document.getElementById("nombre_lote").value || plan.lote;
+  calHayBronquitis = true;
+  calNextId = 0;
+  calendarioActual = plan.filas.map(p => {
+    const vac = CATALOGO.find(v => v.id === p.id);
+    if (!vac) return null;
+    const e = entradaCalendario(vac, p.id, "", p.dia, p.dosis);
+    e.via = (VIA_LABELS[p.via] || {}).label || e.via;
+    e.notas = [p.nota, p.lugar, vac.notas].filter(Boolean).join(". ");
+    return e;
+  }).filter(Boolean).sort((a, b) => a.dia - b.dia);
+  renderTabla(calendarioActual, !!calFechaStr, calLote, calFechaStr, true);
+  const meta = document.getElementById("result-meta");
+  meta.textContent += ` · ${plan.desc}`;
+  document.getElementById("resultado").scrollIntoView({ behavior:"smooth", block:"start" });
 }
 
 // Poblar dropdown del formulario agregar
@@ -1854,7 +2075,6 @@ function switchTab(tab) {
 
 // Vacunas conocidas pero SIN FT cargada aún (agregar aquí nuevas vacunas a medida que se identifiquen)
 const SIN_FT = [
-  { nombre: "CEVAC MD HVT",              tipo: "Vectorizada", proveedor: "Ceva Salud Animal Chile", protege: ["marek"],       reg_sag: "" },
   { nombre: "Avipro Salmonella",         tipo: "Viva",        proveedor: "Encipharm",               protege: ["salmonella"],  reg_sag: "" },
   { nombre: "Corymune 4 (autovacuna)",  tipo: "Inactivada",  proveedor: "Autovacuna",              protege: ["coriza"],      reg_sag: "" },
 ];
@@ -1863,7 +2083,7 @@ const ENF_NOMBRES = {
   marek: "Marek", gumboro: "Gumboro", salmonella: "Salmonella",
   bronquitis: "Bronquitis", newcastle: "Newcastle", laringotraqueitis: "Laringotraqueitis",
   viruela: "Viruela", encefalomielitis: "Encefalomielitis", eds: "EDS",
-  coriza: "Coriza", coccidiosis: "Coccidiosis"
+  coriza: "Coriza", coccidiosis: "Coccidiosis", hci: "HCI"
 };
 
 let estadoFiltro = "todas";
