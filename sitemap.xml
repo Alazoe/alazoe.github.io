@@ -108,4 +108,15 @@
     <priority>0.6</priority>
   </url>
 
+  <url>
+    <loc>https://avivet.cl/avivet/calculadoras-dosis/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://avivet.cl/avivet/calculadoras-dosis/vitaminas.html</loc>
+    <lastmod>2026-11-16</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.6</priority>
+  </url>
 </urlset>
