@@ -172,3 +172,10 @@ git -C ~/alazoe-github-io add vacunas/index.html
 git -C ~/alazoe-github-io commit -m "mensaje"
 git -C ~/alazoe-github-io push origin main
 ```
+
+## SEO: qué es público y qué es interno
+
+- **Públicas (indexables, en `sitemap.xml`)**: solo la portada y lo que ella enlaza — guías (bioseguridad, condensación, examen de la gallina, enfermedades respiratorias, registros), telemedicina, auditoría de gallinero y registro de visitas (admin).
+- **Internas (todo lo demás: apps.html, links, honorarios, /vacunas/, todo /avivet/* salvo las guías, registro-productivo)**: llevan `<meta name="robots" content="noindex, nofollow">` y **no** van al sitemap. Toda página o herramienta nueva nace interna con esa etiqueta.
+- Página pública nueva: canonical, Open Graph, JSON-LD `Article` (modelo: `avivet/Recursos/bioseguridad/`) y agregarla a `sitemap.xml` y al `404.html`.
+- Fotos de la portada: versiones WebP de máx. 1000 px en `assets/img/web/` (originales intactos en `assets/img/Bioseguridad` y `clientes`); `loading="lazy"` en todas menos la primera.
